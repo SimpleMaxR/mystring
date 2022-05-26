@@ -2,10 +2,8 @@
 #include "basic.h"
 #include "mystring.h"
 
-using namespace std;
-
 int main() {
-    char a = 'a';
-    Mystring s1(&a);
+    Mystring s1("hello");
+    std::cout << s1 << std::endl;
     return 0;
 }
