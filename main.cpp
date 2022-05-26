@@ -5,6 +5,7 @@
 using namespace std;
 
 int main() {
-    Mystring s1('a');
+    char a = 'a';
+    Mystring s1(&a);
     return 0;
 }

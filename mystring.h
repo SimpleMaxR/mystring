@@ -7,9 +7,12 @@
 
 class Mystring {
 public:
-    Mystring mystring(const char *s = nullptr);
+    Mystring(const char *s);
 
+public:
     char *strcpy(char *dest, const char *src);
+
+    int strlen(const char *s);
 
 private:
     char *m_data;

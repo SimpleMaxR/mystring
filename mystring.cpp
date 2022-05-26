@@ -4,7 +4,7 @@
 
 #include "mystring.h"
 
-Mystring Mystring::mystring(const char *s) {
+Mystring::Mystring(const char *s) {
     //默认构造函数以及值传递构造函数
     if (s == nullptr) {
         m_data = new char[1];
@@ -25,5 +25,14 @@ char *Mystring::strcpy(char *copy, const char *src) {
     }
     copy[i] = '\0';
     return copy;
+}
+
+//实现strlen
+int Mystring::strlen(const char *s) {
+    int i = 0;
+    while (s[i] != '\0') {
+        i++;
+    }
+    return i;
 }
 
