@@ -34,6 +34,7 @@ Mystring::Mystring(const Mystring &source) {
 //实现strlen
 int strlen(const char *s) {
     int i = 0;
+    //遍历字符串，直到遇到结束符
     while (s[i] != '\0') {
         i++;
     }
@@ -48,7 +49,6 @@ std::ostream &operator<<(std::ostream &os, const Mystring &s) {
 
 //重载输入运算符
 std::istream &operator>>(std::istream &is, Mystring &s) {
-    std::cin.getline(s.m_data, 256);
     is >> s.m_data;
     return is;
 }
@@ -82,6 +82,7 @@ void *memmove(void *destination, const void *source, size_t num) {
 //实现strcpy
 char *Mystring::strcpy(char *cpy, const char *src) {
     int i = 0;
+    //拷贝原字符串到目标字符串
     while (src[i] != '\0') {
         cpy[i] = src[i];
         i++;
@@ -93,10 +94,12 @@ char *Mystring::strcpy(char *cpy, const char *src) {
 //实现strncpy
 char *strncpy(char *destination, const char *source, size_t num) {
     int i = 0;
+    //拷贝源字符串中num个字符到目标字符串
     while (source[i] != '\0' && i < num) {
         destination[i] = source[i];
         i++;
     }
+    //将目标字符串中剩余的字符设置为'\0'
     while (i < num) {
         destination[i] = '\0';
         i++;
@@ -107,10 +110,12 @@ char *strncpy(char *destination, const char *source, size_t num) {
 //实现strcat
 char *strcat(char *destination, const char *source) {
     int i = 0;
+    int j = 0;
+    //找到字符串的末尾
     while (destination[i] != '\0') {
         i++;
     }
-    int j = 0;
+    //拷贝字符串
     while (source[j] != '\0') {
         destination[i] = source[j];
         i++;
@@ -123,10 +128,12 @@ char *strcat(char *destination, const char *source) {
 //实现strncat
 char *strncat(char *destination, const char *source, size_t num) {
     int i = 0;
+    //定位到最后一个字符
     while (destination[i] != '\0') {
         i++;
     }
     int j = 0;
+    //拷贝num个字符
     while (source[j] != '\0' && j < num) {
         destination[i] = source[j];
         i++;
