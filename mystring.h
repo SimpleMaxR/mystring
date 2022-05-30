@@ -43,6 +43,11 @@ public:
 
     size_t strxfrm(char *destination, const char *source, size_t num);
 
+    void *memchr(const void *ptr, int value, size_t num);
+
+    const char *strchr(const char *str, int character);
+
+
 public:
     int strlen(const char *s);
 

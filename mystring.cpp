@@ -147,7 +147,9 @@ char *strncat(char *destination, const char *source, size_t num) {
 int memcmp(const void *ptr1, const void *ptr2, size_t num) {
     char *p1 = (char *) ptr1;
     char *p2 = (char *) ptr2;
+    //遍历num个字符
     for (int i = 0; i < num; i++) {
+        //ptr1和ptr2中的字符不相等，返回不同的字符
         if (p1[i] > p2[i]) {
             return 1;
         } else if (p1[i] < p2[i]) {
@@ -160,19 +162,71 @@ int memcmp(const void *ptr1, const void *ptr2, size_t num) {
 //strcmp
 int strcmp(const char *str1, const char *str2) {
     int i = 0;
+    //遍历str1和str2中的字符,比较大小
     while (str1[i] != '\0' && str2[i] != '\0') {
         if (str1[i] > str2[i]) {
-            return 1;
+            return 1;   //遇到首个不同的字符，str1>str2
         } else if (str1[i] < str2[i]) {
-            return -1;
+            return -1;  //遇到首个不同的字符，str2>str1
+        }
+        i++;
+    }
+
+    if (str1[i] == '\0' && str2[i] == '\0') {
+        return 0;   //str1和str2中的字符相等，返回0
+    } else if (str1[i] == '\0') {
+        return -1;  //str1比str2短
+    } else {
+        return 1;   //str1比str2长
+    }
+}
+
+//实现strcoll
+int strcoll(const char *str1, const char *str2) {
+    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
+        return strcmp(str1, str2);
+    } // 网站没有指明LC_COLLATE为其他值的具体处理方法？？？
+}
+
+//实现strncmp
+int strncmp(const char *str1, const char *str2, size_t num) {
+    int i = 0;
+    //遍历num个字符
+    while (str1[i] != '\0' && str2[i] != '\0' && i < num) {
+        if (str1[i] > str2[i]) {
+            return 1;   //遇到首个不同的字符，str1>str2
+        } else if (str1[i] < str2[i]) {
+            return -1;  //遇到首个不同的字符，str2>str1
         }
         i++;
     }
     if (str1[i] == '\0' && str2[i] == '\0') {
-        return 0;
+        return 0;   //str1和str2中的字符相等，返回0
     } else if (str1[i] == '\0') {
-        return -1;
+        return -1;  //str1比str2短,the first character that does not match has a lower value in ptr1 than in ptr2
     } else {
-        return 1;
+        return 1;   //str1比str2长
     }
 }
+
+//实现strxfrm
+size_t strxfrm(char *destination, const char *source, size_t num) {
+    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
+        return reinterpret_cast<size_t>(strncpy(destination, source, num));
+        //如果 区域选项 是 "POSIX" 或者 "C", 那么 strxfrm() 同用 strncpy() 来 拷贝字符串是等价的.
+    }
+}
+
+//实现memchr
+void *memchr(const void *ptr, int value, size_t num) {
+    char *p = (char *) ptr;
+    //遍历num个字符
+    for (int i = 0; i < num; i++) {
+        //ptr中的字符与value相等，返回该字符的地址
+        if (p[i] == value) {
+            return p + i;
+        }
+    }
+    return NULL;
+}
+
