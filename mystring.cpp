@@ -3,6 +3,9 @@
 //
 #include <iostream>
 #include "mystring.h"
+
+using namespace std;
+
 //默认构造函数
 Mystring::Mystring() {
     m_data = new char[1];
@@ -30,16 +33,6 @@ Mystring::Mystring(const Mystring &source) {
     std::cout << "copy constructor called, new m_data is" << m_data << std::endl;
 }
 
-
-//实现strlen
-int strlen(const char *s) {
-    int i = 0;
-    //遍历字符串，直到遇到结束符
-    while (s[i] != '\0') {
-        i++;
-    }
-    return i;
-}
 
 //重载输出运算符
 std::ostream &operator<<(std::ostream &os, const Mystring &s) {
@@ -181,12 +174,12 @@ int strcmp(const char *str1, const char *str2) {
     }
 }
 
-//实现strcoll
-int strcoll(const char *str1, const char *str2) {
-    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
-        return strcmp(str1, str2);
-    } // 网站没有指明LC_COLLATE为其他值的具体处理方法？？？
-}
+//TODO 实现strcoll ??
+//int strcoll(const char *str1, const char *str2) {
+//    if (LC_COLLATE == "C" || LC_COLLATE == "POSIX") {
+//        return strcmp(str1, str2);
+//    } // 网站没有指明LC_COLLATE为其他值的具体处理方法？？？
+//}
 
 //实现strncmp
 int strncmp(const char *str1, const char *str2, size_t num) {
@@ -209,24 +202,163 @@ int strncmp(const char *str1, const char *str2, size_t num) {
     }
 }
 
-//实现strxfrm
-size_t strxfrm(char *destination, const char *source, size_t num) {
-    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
-        return reinterpret_cast<size_t>(strncpy(destination, source, num));
-        //如果 区域选项 是 "POSIX" 或者 "C", 那么 strxfrm() 同用 strncpy() 来 拷贝字符串是等价的.
-    }
-}
+//TODO 实现strxfrm ??
+//size_t strxfrm(char *destination, const char *source, size_t num) {
+//    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
+//        return reinterpret_cast<size_t>(strncpy(destination, source, num));
+//        //如果 区域选项 是 "POSIX" 或者 "C", 那么 strxfrm() 同用 strncpy() 来 拷贝字符串是等价的.
+//    }
+//}
+
 
 //实现memchr
 void *memchr(const void *ptr, int value, size_t num) {
     char *p = (char *) ptr;
     //遍历num个字符
     for (int i = 0; i < num; i++) {
-        //ptr中的字符与value相等，返回该字符的地址
+        //str中的字符与value相等，返回该字符的地址
         if (p[i] == value) {
             return p + i;
         }
     }
     return NULL;
 }
+
+//实现strchr
+char *strchr(const char *str, int value) {
+    int i = 0;
+    //遍历str中的字符
+    while (str[i] != '\0') {
+        //str中的字符与value相等，返回该字符的地址
+        if (str[i] == value) {
+            return (char *) str + i;
+        }
+        i++;
+    }
+    return NULL;
+}
+
+//实现strcspn
+size_t strcspn(const char *str1, const char *str2) {
+    int i = 0;
+    //遍历str1中的字符
+    while (str1[i] != '\0') {
+        //str2中的字符与str1中的字符相等，返回该字符的地址
+        if (strchr(str2, str1[i]) != NULL) {
+            return i;
+        }
+        i++;
+    }
+    return i;
+}
+
+//实现strpbrk
+char *strpbrk(char *str1, const char *str2) {
+    int i = 0;
+    //遍历str1中的字符
+    while (str1[i] != '\0') {
+        //str2中的字符与str1中的字符相等，返回该字符的地址
+        if (strchr(str2, str1[i]) != NULL) {
+            return (char *) str1 + i;
+        }
+        i++;
+    }
+    return NULL;
+}
+
+//实现strrchr
+char *strrchr(const char *str, int value) {
+    int i = 0;
+    //遍历str中的字符
+    while (str[i] != '\0') {
+        //str中的字符与value相等，返回该字符的地址
+        if (str[i] == value) {
+            return (char *) str + i;
+        }
+        i++;
+    }
+    return NULL;
+}
+
+//strspn
+size_t strspn(const char *str1, const char *str2) {
+    //检索字符串 str1 中第一个不在字符串 str2 中出现的字符下标。
+    int i = 0;
+    //遍历str1中的字符
+    while (str1[i] != '\0' && strchr(str2, str1[i]) != NULL) {
+        i++;
+    }
+    return i;
+}
+
+//strstr TODO 实现strstr
+char *strstr(const char *str1, const char *str2) {
+    int i = 0;
+    //遍历str1中的字符
+    while (str1[i] != '\0') {
+        //str2中的字符与str1中的字符相等，返回该字符的地址
+        if (strncmp(str1 + i, str2, strlen(str2)) == 0) {
+            return (char *) str1 + i;
+        }
+        i++;
+    }
+    return NULL;
+}
+
+//strtok TODO 实现strtok
+char *strtok(char *str, const char *delim) {
+    static char *p = NULL;
+    if (str != NULL) {
+        p = str;
+    }
+    if (p == NULL) {
+        return NULL;
+    }
+    //检索字符串 str 中第一个不在字符串 delim 中出现的字符下标。
+    int i = strspn(p, delim);
+    if (p[i] == '\0') {
+        return NULL;
+    }
+    char *token = p + i;
+    p = strpbrk(token, delim);
+    if (p == NULL) {
+        p = NULL;
+    } else {
+        *p = '\0';
+        p++;
+    }
+    return token;
+}
+
+//memset TODO 实现memset
+void *memset(void *ptr, int value, size_t num) {
+    char *p = (char *) ptr;
+    //遍历num个字符
+    for (int i = 0; i < num; i++) {
+        //str中的字符与value相等，返回该字符的地址
+        p[i] = value;
+    }
+    return ptr;
+}
+
+//strerror TODO 实现strerror
+char *strerror(int errnum) {
+    return "strerror";
+}
+
+//strlen
+size_t strlen(const char *s) {
+    int i = 0;
+    //遍历字符串，直到遇到结束符
+    while (s[i] != '\0') {
+        i++;
+    }
+    return i;
+}
+
+
+
+
+
+
 

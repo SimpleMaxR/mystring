@@ -20,9 +20,9 @@ void debugString() {
 void debugMyString() {
     cout << "debugMyString" << endl;
     char str[] = "memmove can be very useful......";
-    memmove(str + 10, str + 15, 11);
-    memcpy(str + 10, str + 15, 11);
-    puts(str);
+    char s1[] = "12345";
+    char s2[] = "abc12";
+    cout << strpbrk(s1, s2) << endl;
 }
 
 int main() {
