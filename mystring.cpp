@@ -354,26 +354,26 @@ void *memset(void *ptr, int value, size_t num) {
 }
 
 //实现strerror TODO 实现strerror
-char *strerror(int errnum) {
-    return "strerror";
-}
+//char *strerror(int errnum) {
+//    return "strerror";
+//}
 
 
 //实现stoi
-int stoi(const char *str, size_t *idx, int base) {
-}
+//int stoi(const char *str, size_t *idx, int base) {
+//}
 
 //实现stol
-long stol(const char *str, size_t *idx, int base) {
-    //转换str为long型
-    long result = 0;
-    int i = 0;
-    //遍历str中的字符
-    if (str != NULL && str[0] != '\0') {
-
-
-    }
-}
+//long stol(const char *str, size_t *idx, int base) {
+//    //转换str为long型
+//    long result = 0;
+//    int i = 0;
+//    //遍历str中的字符
+//    if (str != NULL && str[0] != '\0') {
+//
+//
+//    }
+//}
 
 //实现strlen
 size_t strlen(const char *s) {
@@ -389,10 +389,10 @@ size_t strlen(const char *s) {
 long strtol(const char *str, char **endptr, int base) {
     //转换str为long型
     long int result = 0;
-    int i = 0;
     bool isNegative = false;
     const char *pos = str;
     const char *start = pos;
+    //跳过空白字符
     while (isspace(*pos)) {
         pos++;
     }
@@ -408,11 +408,11 @@ long strtol(const char *str, char **endptr, int base) {
     }
     //如base已知，则可以准备转换
     if (base == 16 || base == 8) {
-        if (base == 8 && *pos == '0') {
-            pos++;
-        }
         if (base == 16 && *pos == '0' && (*(pos + 1) == 'x' || *(pos + 1) == 'X')) {
             pos += 2;
+        }
+        if (base == 8 && *pos == '0') {
+            pos++;
         }
     }
     //base不明确，判断base
@@ -448,8 +448,8 @@ long strtol(const char *str, char **endptr, int base) {
         }
         //处理转换后数字
         if (num < base && num != -1) {
-            if (isNegative == true) {
-                if (result >= ((LONG_MIN + num) / base) {
+            if (isNegative) {
+                if (result >= ((LONG_MIN + num) / base)) {
                     result = result * base - num;
                 } else {
                     result = LONG_MIN;
@@ -467,7 +467,7 @@ long strtol(const char *str, char **endptr, int base) {
         } else {
             break;
         }
-        i++;
+        pos++;
     }
     if (!isdigit(*(pos - 1)) && !isalpha(*(pos - 1)))
         pos = start;
