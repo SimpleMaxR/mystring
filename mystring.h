@@ -66,6 +66,13 @@ public:
 
     char *strtok(char *str, const char *delimiters);
 
+//    2、实现以下功能。（共9个）。功能描述与使用见：http://www.cplusplus.com/reference/string/
+//      Convert from strings
+    int stoi(const char *str, size_t *idx, int base);
+
+    long stol(const char *str, size_t *idx, int base);
+
+
 //    other
     void *memset(void *ptr, int value, size_t num);
 

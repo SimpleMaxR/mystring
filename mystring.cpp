@@ -2,7 +2,10 @@
 // Created by Hugo-PC on 24/5/2022.
 //
 #include <iostream>
+#include <climits>
 #include "mystring.h"
+
+size_t strlen(const char *s);
 
 using namespace std;
 
@@ -82,6 +85,14 @@ char *Mystring::strcpy(char *cpy, const char *src) {
     }
     cpy[i] = '\0';
     return cpy;
+}
+
+size_t Mystring::strlen(const char *str) {
+    int i = 0;
+    while (str[i] != '\0') {
+        i++;
+    }
+    return i;
 }
 
 //实现strncpy
@@ -280,7 +291,7 @@ char *strrchr(const char *str, int value) {
     return NULL;
 }
 
-//strspn
+//实现strspn
 size_t strspn(const char *str1, const char *str2) {
     //检索字符串 str1 中第一个不在字符串 str2 中出现的字符下标。
     int i = 0;
@@ -291,7 +302,7 @@ size_t strspn(const char *str1, const char *str2) {
     return i;
 }
 
-//strstr TODO 实现strstr
+//实现strstr TODO 实现strstr
 char *strstr(const char *str1, const char *str2) {
     int i = 0;
     //遍历str1中的字符
@@ -305,7 +316,8 @@ char *strstr(const char *str1, const char *str2) {
     return NULL;
 }
 
-//strtok TODO 实现strtok
+
+//实现strtok TODO 实现strtok
 char *strtok(char *str, const char *delim) {
     static char *p = NULL;
     if (str != NULL) {
@@ -330,7 +342,7 @@ char *strtok(char *str, const char *delim) {
     return token;
 }
 
-//memset TODO 实现memset
+//实现memset TODO 实现memset
 void *memset(void *ptr, int value, size_t num) {
     char *p = (char *) ptr;
     //遍历num个字符
@@ -341,12 +353,29 @@ void *memset(void *ptr, int value, size_t num) {
     return ptr;
 }
 
-//strerror TODO 实现strerror
+//实现strerror TODO 实现strerror
 char *strerror(int errnum) {
     return "strerror";
 }
 
-//strlen
+
+//实现stoi
+int stoi(const char *str, size_t *idx, int base) {
+}
+
+//实现stol
+long stol(const char *str, size_t *idx, int base) {
+    //转换str为long型
+    long result = 0;
+    int i = 0;
+    //遍历str中的字符
+    if (str != NULL && str[0] != '\0') {
+
+
+    }
+}
+
+//实现strlen
 size_t strlen(const char *s) {
     int i = 0;
     //遍历字符串，直到遇到结束符
@@ -356,9 +385,95 @@ size_t strlen(const char *s) {
     return i;
 }
 
+//实现strtol
+long strtol(const char *str, char **endptr, int base) {
+    //转换str为long型
+    long int result = 0;
+    int i = 0;
+    bool isNegative = false;
+    const char *pos = str;
+    const char *start = pos;
+    while (isspace(*pos)) {
+        pos++;
+    }
+    //判断正负
+    if (pos != NULL && *pos != '\0') {
+        if (*pos == '+') {
+            pos++;
+        }
+        if (*pos == '-') {
+            pos++;
+            isNegative = true;
+        }
+    }
+    //如base已知，则可以准备转换
+    if (base == 16 || base == 8) {
+        if (base == 8 && *pos == '0') {
+            pos++;
+        }
+        if (base == 16 && *pos == '0' && (*(pos + 1) == 'x' || *(pos + 1) == 'X')) {
+            pos += 2;
+        }
+    }
+    //base不明确，判断base
+    if (base == 0) {
+        base = 10;
+        if (*pos == '0') {
+            base = 8;
+            pos++;
+            if (*pos == 'x' || *pos == 'X') {
+                pos++;
+                base = 16;
+            }
+            if (*pos == 'b' || *pos == 'B') {
+                pos++;
+                base = 2;
+            }
+        }
+    }
+    //base数值错误
+    if ((base < 2 || base > 36) || (base > 10 && base < 16)) {
+        return 0;
+    }
 
+    while (*pos != '\0') {
+        long long num = -1;
+        //转换‘0’~'9'之间的字符
+        if ((int) *pos >= 48 && (int) *pos <= 57) {
+            num = (int) *pos - 48;
+        }
+        //转换‘a'~'f'之间的字符
+        if (isalpha(*pos)) {
+            num = (int) toupper(*pos) - 55;
+        }
+        //处理转换后数字
+        if (num < base && num != -1) {
+            if (isNegative == true) {
+                if (result >= ((LONG_MIN + num) / base) {
+                    result = result * base - num;
+                } else {
+                    result = LONG_MIN;
+                }
+            } else {
+                if (result <= ((LONG_MAX - num) / base)) {
+                    result = result * base + num;
+                } else {
+                    result = LONG_MAX;
+                }
+            }
+        } else if (base == 16 && num > base && (*(pos - 1) == 'x' || *(pos - 1) == 'X')) {
+            --pos;
+            break;
+        } else {
+            break;
+        }
+        i++;
+    }
+    if (!isdigit(*(pos - 1)) && !isalpha(*(pos - 1)))
+        pos = start;
 
-
-
-
+    if (endptr)
+        *endptr = (char *) pos;
+    return result;
+}
 
