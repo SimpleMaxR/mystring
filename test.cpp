@@ -40,6 +40,41 @@ void test::test_memmove() {
 //    return 0;
 }
 
+void test::test_stoi() {
+    Mystring a;
+    const char *str_dec = "2001, A Space Odyssey";
+    const char *str_hex = "40c3";
+    const char *str_bin = "-10010110001";
+    const char *str_auto = "0x7f";
+
+    size_t *p;
+
+    int i_dec = a.stoi(str_dec, p, 0);
+    int i_hex = a.stoi(str_hex, nullptr, 16);
+    int i_bin = a.stoi(str_bin, nullptr, 2);
+    int i_auto = a.stoi(str_auto, nullptr, 0);
+
+//    cout << str_dec << ": " << i_dec << " and [" << str_dec.substr(sz) << "]\n"; //TODO substr未完成
+    cout << str_hex << ": " << i_hex << '\n';
+    cout << str_bin << ": " << i_bin << '\n';
+    cout << str_auto << ": " << i_auto << '\n';
+}
+
+void test::test_stol() {
+    Mystring a;
+    const char *str_dec = "2001, A Space Odyssey";
+    const char *str_hex = "40c3";
+    const char *str_bin = "-10010110001";
+    const char *str_auto = "0x7f";
+
+    size_t *p;
+
+    long i_dec = a.stol(str_dec, p, 0);
+    long i_hex = a.stol(str_hex, nullptr, 16);
+    long i_bin = a.stol(str_bin, nullptr, 2);
+    long i_auto = a.stol(str_auto, nullptr, 0);
+}
+
 void test::test_strtol() {
 
     char szNumbers[] = "2001 60c0c0 -1101110100110100100000 0x6fffff";

@@ -96,7 +96,11 @@ public:
 
     long stol(const char *str, size_t *idx, int base);
 
+    unsigned long stoul(const Mystring &str, size_t *idx = 0, int base = 10);
+
     long strtol(const char *str, char **endptr, int base);
+
+    unsigned long int strtoul(const char *str, char **endptr, int base);
 
 
 //    other

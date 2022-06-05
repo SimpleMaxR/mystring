@@ -18,6 +18,10 @@ public:
 
     void test_memmove();
 
+    void test_stoi();
+
+    void test_stol();
+
     void test_strtol();
 };
 

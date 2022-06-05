@@ -378,33 +378,54 @@ char *Mystring::strerror(int errnum) {
 }
 
 
-//实现stoi
+//实现stoi(利用strtol)
 int Mystring::stoi(const char *str, size_t *idx, int base) {
+    char *endptr;
 
+    int result = strtol(str, &endptr, base);   //调用strtol进行转换
+    if (endptr == str) {
+        //转换失败或者没有转换，返回0
+        return 0;
+    }
+    if (idx != NULL) {
+        //idx不为空，记录转换后的字符串的下标
+        *idx = endptr - str;
+    }
+    return result;
 }
 
-//实现stol
-//long stol(const char *str, size_t *idx, int base) {
-//    //转换str为long型
-//    long result = 0;
-//    int i = 0;
-//    //遍历str中的字符
-//    if (str != NULL && str[0] != '\0') {
-//
-//
-//    }
-//}
+//实现stol(利用strtol)
+long Mystring::stol(const char *str, size_t *idx, int base) {
+    char *endptr;
+    long result;
+    //校验转换结果为long型可表示范围
+    long long temp = strtol(str, &endptr, base);    //调用strtol进行转换,用更大的long long型变量存储转换结果，节省一次转换
+    if (temp > LONG_MAX) {
+        return LONG_MAX;   //转换结果超过long型可表示范围，返回long型最大值
+    } else
+        result = temp;   //转换结果在long型可表示范围内，直接返回转换结果
 
-//TODO 实现strtol
-long strtol(const char *str, char **endptr, int base) {
+    if (endptr == str) {
+        //转换失败或者没有转换，返回0
+        return 0;
+    }
+    if (idx != NULL) {
+        //idx不为空，记录转换后的字符串的下标
+        *idx = endptr - str;
+    }
+    return result;
+}
+
+//实现strtol
+long Mystring::strtol(const char *str, char **endptr, int base) {
     long int result = 0;        //存储转换结果
     bool isNegative = false;    //是否是负数
     const char *pos = str;      //指向str中的当前字符
     const char *start = pos;    //开始转换的位置
 
     //检查base数值
-    if ((base < 2 || base > 36) || (base > 10 && base < 16)) {
-        return 0;
+    if ((base < 2 || base > 36) && base != 0) {
+        return -1;
     }
 
     //跳过空白字符
@@ -491,7 +512,13 @@ long strtol(const char *str, char **endptr, int base) {
     return result;
 }
 
-inline Mystring Mystring::operator=(const Mystring &str) {
+//实现strtoul
+unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
+    return 0;
+}
+
+
+Mystring Mystring::operator=(const Mystring &str) {
     //如果自身与参数str指向同一个字符串，则直接返回自身
     if (&str == this) {
         return *this;
@@ -553,6 +580,7 @@ Mystring &Mystring::operator+=(const Mystring &s) {
     }
     return *this;
 }
+
 
 
 
