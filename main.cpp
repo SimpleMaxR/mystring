@@ -1,8 +1,9 @@
 #include <iostream>
-#include <cstring>
-#include "basic.h"
+//#include <cstring>
+//#include "basic.h"
 //#include <string>
 #include "mystring.h"
+#include "test.h"
 
 using namespace std;
 
@@ -18,14 +19,17 @@ void debugString() {
 }
 
 void debugMyString() {
-    char szNumbers[] = "2001 60c0c0 -1101110100110100100000 0x6fffff";
-    char *pEnd;
-    long int li1, li2, li3, li4;
-    li1 = strtol(szNumbers, &pEnd, 10);
-    li2 = strtol(pEnd, &pEnd, 16);
-    li3 = strtol(pEnd, &pEnd, 2);
-    li4 = strtol(pEnd, NULL, 0);
-    printf("The decimal equivalents are: %ld, %ld, %ld and %ld.\n", li1, li2, li3, li4);
+    //strlen用来检查字符串长度，标准函数声明 : size_t strlen(const char *str);
+
+    Mystring a;                //方法一：为了调用函数，要先创建一个对象a
+    const char *s1("hello");
+    a.strlen(s1);
+
+    Mystring s2("hello");   //方法二：更符合使用直觉，但函数声明和标准库定义的不一样
+    s2.strlen();
+
+    test t;
+    t.test_strtol();
 }
 
 int main() {

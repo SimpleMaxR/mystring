@@ -12,6 +12,25 @@ class Mystring {
 
     friend std::istream &operator>>(std::istream &is, Mystring &s);
 
+    friend Mystring &operator+(const Mystring &left, const Mystring &right);
+
+    friend bool operator==(const Mystring &left, const Mystring &right);
+
+    friend bool operator!=(const Mystring &left, const Mystring &right);
+
+    friend bool operator>(const Mystring &left, const Mystring &right);
+
+    friend bool operator<(const Mystring &left, const Mystring &right);
+
+    friend bool operator<=(const Mystring &left, const Mystring &right);
+
+    friend bool operator>=(const Mystring &left, const Mystring &right);
+
+public://    运算符重载
+    Mystring &operator+=(const Mystring &s);
+
+    Mystring operator=(const Mystring &);
+
 public:
     Mystring();
 
@@ -19,12 +38,17 @@ public:
 
     Mystring(const Mystring &source);
 
+    char operator[](size_t index) const;
+
+    char &operator[](size_t index);
+
+
 //<cstring>的24个功能  https://m.cplusplus.com/reference/cstring/
 public:
 //    Copying:
-    void *memcpy(void *destination, const void *source, size_t num);
+    void *memcpy(const Mystring source, size_t num);
 
-    void *memmove(void *destination, const void *source, size_t num);
+    void *memmove(void *dest, const void *source, size_t count);
 
     char *strcpy(char *copy, const char *src);
 
@@ -32,7 +56,7 @@ public:
 
 //    Concatenation:
 
-    char *strcat(char *destination, const char *source);
+    char *strcat(const char *source);
 
     char *strncat(char *destination, const char *source, size_t num);
 
@@ -72,14 +96,20 @@ public:
 
     long stol(const char *str, size_t *idx, int base);
 
+    long strtol(const char *str, char **endptr, int base);
+
 
 //    other
     void *memset(void *ptr, int value, size_t num);
+
+    size_t strlen() const;
 
     size_t strlen(const char *str);
 
     char *strerror(int errnum);
 
+public:
+    ~Mystring();
 
 private:
     char *m_data;
