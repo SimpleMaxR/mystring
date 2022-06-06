@@ -1,7 +1,4 @@
 #include <iostream>
-//#include <cstring>
-//#include "basic.h"
-//#include <string>
 #include "mystring.h"
 #include "test.h"
 
@@ -19,9 +16,12 @@ void debugString() {
 }
 
 void debugMyString() {
-    test t;
-//    t.test_strtol();
-    Mystring s1("i don't know");
+
+    Mystring s2("Hello");
+
+    Mystring s5(s2, 1);
+    cout << "s5: " << s5 << endl;
+
 }
 
 int main() {

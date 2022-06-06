@@ -37,7 +37,7 @@ public:
     char &operator[](size_t index);
 
 
-//<cstring>的24个功能  https://m.cplusplus.com/reference/cstring/
+//1. <cstring>的24个功能  https://m.cplusplus.com/reference/cstring/
 public:
 //    Copying:
     void *memcpy(const Mystring source, size_t num);
@@ -130,6 +130,8 @@ public:
     char *strerror(int errnum);
 
     size_t length() const;
+
+    size_t capacity() const;
 
 public:
     ~Mystring();

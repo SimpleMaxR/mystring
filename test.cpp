@@ -5,7 +5,6 @@
 #include "test.h"
 #include "mystring.h"
 #include <iostream>
-
 using namespace std;
 
 void test::test_inputoutput() {

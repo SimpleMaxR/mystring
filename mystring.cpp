@@ -29,10 +29,10 @@ Mystring::Mystring(const Mystring &source) {
 //实现 substring constructor
 Mystring::Mystring(const Mystring &str, size_t pos, size_t len) {
     //分别设置容量，长度，数据成员指针
-    m_length = len;
-    m_capacity = len;
-    m_data = new char[m_capacity + 1];
-    strncpy(m_data, str.m_data + pos, len);  //拷贝源字符串
+    m_length = str.length();
+    m_capacity = str.capacity();
+    m_data = new char[m_capacity];
+    strncpy(m_data, str.m_data + pos, str.length());  //拷贝源字符串
     m_data[len] = '\0';
 }
 //    if (pos > str.length()) {
@@ -301,13 +301,16 @@ int Mystring::strncmp(const char *str1, const char *str2, size_t num) {
     }
 }
 
-//TODO 实现strxfrm ??
+//实现strxfrm
 size_t Mystring::strxfrm(char *destination, const char *source, size_t num) {
-//    if (LC_COLLATE == 'C' || LC_COLLATE == 'POSIX') {
-//        return reinterpret_cast<size_t>(strncpy(destination, source, num));
-//        //如果 区域选项 是 "POSIX" 或者 "C", 那么 strxfrm() 同用 strncpy() 来 拷贝字符串是等价的.
-//    }
-    return 0;
+    //简单实现，直接拷贝source到destination
+    int i = 0;
+    while (source[i] != '\0' && i < num) {
+        destination[i] = source[i];
+        i++;
+    }
+    destination[i] = '\0';
+    return i;
 }
 
 
@@ -443,11 +446,43 @@ void *Mystring::memset(void *ptr, int value, size_t num) {
     return ptr;
 }
 
-//实现strerror TODO 实现strerror
+//实现strerror
 char *Mystring::strerror(int errnum) {
-    return "Error";
+    char *errmsg;
+    switch (errnum) {
+        case 0:
+            strcpy(errmsg, "Success");
+            break;
+        case 1:
+            strcpy(errmsg, "EPERM");
+            break;
+        case 2:
+            strcpy(errmsg, "ENOENT");
+            break;
+        case 3:
+            strcpy(errmsg, "ESRCH");
+            break;
+        case 4:
+            strcpy(errmsg, "EINTR");
+            break;
+        case 5:
+            strcpy(errmsg, "EIO");
+            break;
+        case 6:
+            strcpy(errmsg, "ENXIO");
+            break;
+        case 7:
+            strcpy(errmsg, "E2BIG");
+            break;
+        case 8:
+            strcpy(errmsg, "ENOEXEC");
+            break;
+        default:
+            strcpy(errmsg, "Unknown error");
+            break;
+    }
+    return errmsg;
 }
-
 
 //实现stoi(利用strtol)
 int Mystring::stoi(const char *str, size_t *idx, int base) {
@@ -655,6 +690,10 @@ size_t Mystring::strlen(const char *str) {
 
 size_t Mystring::length() const {
     return this->m_length;
+}
+
+size_t Mystring::capacity() const {
+    return this->m_capacity;
 }
 
 //运算符重载
