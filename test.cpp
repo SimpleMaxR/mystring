@@ -15,8 +15,18 @@ void test::test_inputoutput() {
 }
 
 void test::test_constructor() {
-    Mystring s1("Hello");
-    cout << s1 << endl;
+    Mystring s1;
+    Mystring s2("Hello");
+    Mystring s3(s2);
+    Mystring s4(s2, 1, 3);
+    Mystring s5(s2, 1);
+    Mystring s6(2, 'a');
+    cout << "s1: " << s1 << endl;
+    cout << "s2: " << s2 << endl;
+    cout << "s3: " << s3 << endl;
+    cout << "s4: " << s4 << endl;
+    cout << "s5: " << s5 << endl;
+    cout << "s6: " << s6 << endl;
 }
 
 void test::test_copyConstructor() {

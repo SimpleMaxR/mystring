@@ -9,37 +9,108 @@ size_t strlen(const char *s);
 
 using namespace std;
 
-//默认构造函数
+//默认构造函数 default constructor
 Mystring::Mystring() {
-    m_data = new char[1];
-    *m_data = '\0';
+    m_capacity = 0;
+    m_length = 0;
+    m_data = new char[m_capacity + 1];
+    m_data[m_length] = '\0';
 }
 
-//值传递构造函数
+//拷贝构造函数 copy constructor
+Mystring::Mystring(const Mystring &source) {
+    //分别设置容量，长度，数据成员指针
+    m_length = source.m_length;
+    m_capacity = source.m_capacity;
+    m_data = new char[m_capacity + 1];
+    strcpy(m_data, source.m_data);  //拷贝源字符串
+}
+
+//实现 substring constructor
+Mystring::Mystring(const Mystring &str, size_t pos, size_t len) {
+    //分别设置容量，长度，数据成员指针
+    m_length = len;
+    m_capacity = len;
+    m_data = new char[m_capacity + 1];
+    strncpy(m_data, str.m_data + pos, len);  //拷贝源字符串
+    m_data[len] = '\0';
+}
+//    if (pos > str.length()) {
+//        pos = str.length();
+//    }
+//    if (len > str.length() - pos) {
+//        len = str.length() - pos;
+//    }
+//    if (len <= 0) {
+//        len = 0;
+//    }
+//    this->m_data = new char[len + 1];
+//    strncpy(this->m_data, str.str + pos, len);
+//    this->m_data[len] = '\0';
+//    this->m_length = len;
+//}
+
+//值传递构造函数 from c-string
 Mystring::Mystring(const char *s) {
+    //判断是否为空
     if (s == nullptr) {
-        m_data = new char[1];
+        //创建空字符串
+        m_capacity = 0;
+        m_length = 0;
+        m_data = new char[m_capacity + 1];
         *m_data = '\0';
     } else {
-        int length = strlen(s);
-        m_data = new char[length + 1];
-        strcpy(m_data, s);
+        m_length = strlen(s); //设置容量为源字符串长度
+        if (m_length > INT_MAX) {
+            m_capacity = INT_MAX; //如果长度超过INT_MAX，则容量设置为INT_MAX
+        } else {
+            m_capacity = m_length; //否则容量设置为长度
+        }
+        m_data = new char[m_capacity + 1];  //分配空间
+        strcpy(m_data, s);  //拷贝源字符串
     }
 }
 
-//拷贝构造函数
-Mystring::Mystring(const Mystring &source) {
-    //先确定长度
-    int length = strlen(source.m_data);
-    m_data = new char[length + 1];
-    //循环赋值
-    for (int i = 0; i < length; i++) {
-        m_data[i] = source.m_data[i];
+//from sequence constructor
+Mystring::Mystring(const char *s, size_t n) {
+    //判断是否为空
+    if (s == nullptr) {
+        //创建空字符串
+        Mystring();
+    } else {
+        m_length = n; //设置容量为源字符串长度
+        if (m_length > INT_MAX) {
+            m_capacity = INT_MAX; //如果长度超过INT_MAX，则容量设置为INT_MAX
+        } else {
+            m_capacity = m_length; //否则容量设置为长度
+        }
+        m_data = new char[m_capacity + 1];  //分配空间
+        strncpy(m_data, s, n);  //拷贝源字符串
+        m_data[n] = '\0';
+
     }
-    //没有终止符则加上终止符
-    if (m_data[length - 1] != '\0') m_data[length - 1] = '\0';
+
 }
 
+//fill constructor
+Mystring::Mystring(size_t n, char c) {
+    //判断是否为空
+    if (n == 0) {
+        //创建空字符串
+        Mystring();
+    } else {
+        m_length = n; //设置容量为源字符串长度
+        if (m_length > INT_MAX) {
+            m_capacity = INT_MAX; //如果长度超过INT_MAX，则容量设置为INT_MAX
+        } else {
+            m_capacity = m_length; //否则容量设置为长度
+        }
+        m_data = new char[m_capacity + 1];  //分配空间
+        for (size_t i = 0; i < n; i++) {
+            m_data[i] = c;  //拷贝源字符
+        }
+    }
+}
 
 //重载输出运算符
 std::ostream &operator<<(std::ostream &os, const Mystring &s) {
@@ -381,11 +452,12 @@ char *Mystring::strerror(int errnum) {
 //实现stoi(利用strtol)
 int Mystring::stoi(const char *str, size_t *idx, int base) {
     char *endptr;
-
-    int result = strtol(str, &endptr, base);   //调用strtol进行转换
+    int result;
+    long temp = strtol(str, &endptr, base);
+    result = (temp > INT_MAX ? INT_MAX : temp); //检查是否超出范围,超出范围则返回INT_MAX
     if (endptr == str) {
         //转换失败或者没有转换，返回0
-        return 0;
+        return -1;
     }
     if (idx != NULL) {
         //idx不为空，记录转换后的字符串的下标
@@ -414,6 +486,33 @@ long Mystring::stol(const char *str, size_t *idx, int base) {
         *idx = endptr - str;
     }
     return result;
+}
+
+//TODO 实现stoul(利用strtoul)
+unsigned long Mystring::stoul(const Mystring &str, size_t *idx, int base) {
+    return 0;
+}
+
+//TODO 实现stoll(利用strtoll)
+long long Mystring::stoll(const Mystring &str, size_t *idx, int base) {
+    return 0;
+}
+
+//TODO 四个实现
+unsigned long long Mystring::stoull(const Mystring &str, size_t *idx, int base) {
+    return 0;
+}
+
+float Mystring::stof(const Mystring &str, size_t *idx) {
+    return 0;
+}
+
+double Mystring::stod(const Mystring &str, size_t *idx) {
+    return 0;
+}
+
+long double Mystring::stold(const Mystring &str, size_t *idx) {
+    return 0;
 }
 
 //实现strtol
@@ -512,11 +611,10 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
     return result;
 }
 
-//实现strtoul
+//TODO 实现strtoul
 unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
     return 0;
 }
-
 
 Mystring Mystring::operator=(const Mystring &str) {
     //如果自身与参数str指向同一个字符串，则直接返回自身
@@ -555,9 +653,8 @@ size_t Mystring::strlen(const char *str) {
     return i;
 }
 
-
-Mystring::~Mystring() {
-    delete[] m_data;
+size_t Mystring::length() const {
+    return this->m_length;
 }
 
 //运算符重载
@@ -580,6 +677,14 @@ Mystring &Mystring::operator+=(const Mystring &s) {
     }
     return *this;
 }
+
+//析构函数
+Mystring::~Mystring() {
+    delete[] m_data;
+}
+
+
+
 
 
 

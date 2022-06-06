@@ -21,7 +21,7 @@ void debugString() {
 void debugMyString() {
     test t;
 //    t.test_strtol();
-    t.test_stoi();
+    Mystring s1("i don't know");
 }
 
 int main() {

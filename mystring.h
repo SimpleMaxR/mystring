@@ -32,12 +32,6 @@ public://    运算符重载
     Mystring operator=(const Mystring &);
 
 public:
-    Mystring();
-
-    Mystring(const char *s);
-
-    Mystring(const Mystring &source);
-
     char operator[](size_t index) const;
 
     char &operator[](size_t index);
@@ -98,10 +92,33 @@ public:
 
     unsigned long stoul(const Mystring &str, size_t *idx = 0, int base = 10);
 
+    long long stoll(const Mystring &str, size_t *idx = 0, int base = 10);
+
+    unsigned long long stoull(const Mystring &str, size_t *idx = 0, int base = 10);
+
+    float stof(const Mystring &str, size_t *idx = 0);
+
+    double stod(const Mystring &str, size_t *idx = 0);
+
+    long double stold(const Mystring &str, size_t *idx = 0);
+
     long strtol(const char *str, char **endptr, int base);
 
     unsigned long int strtoul(const char *str, char **endptr, int base);
 
+// 3、Construct string object。（共6个）。功能描述与使用见：http://www.cplusplus.com/reference/string/string/string/ (
+
+    Mystring();
+
+    Mystring(const Mystring &str);
+
+    Mystring(const Mystring &str, size_t pos, size_t len = npos);
+
+    Mystring(const char *s);
+
+    Mystring(const char *s, size_t n);
+
+    Mystring(size_t n, char c);
 
 //    other
     void *memset(void *ptr, int value, size_t num);
@@ -112,11 +129,19 @@ public:
 
     char *strerror(int errnum);
 
+    size_t length() const;
+
 public:
     ~Mystring();
 
 private:
-    char *m_data;
+    char *m_data;//    指向字符串的指针
+    static const size_t npos = -1;//    表示不存在的位置
+    size_t m_length;//    字符串长度
+    size_t m_capacity;//    字符串容量
+
+    inline void setNewCapacity(size_t newCapacity);
+
 };
 
 #endif //MYSTRING_MYSTRING_H
