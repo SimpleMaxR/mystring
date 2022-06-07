@@ -15,12 +15,26 @@ void debugString() {
 //    cout << s1 << endl;
 }
 
+void debugPass() {
+    test t;
+    t.test_memcpy();
+    t.test_strcpy();
+    t.test_strncpy();
+    t.test_strcat();
+    t.test_strncat();
+    t.test_memcmp();
+    t.test_strncmp();
+    t.test_strxfrm();
+    t.test_memchr();
+    t.test_strchr();
+    t.test_strcspn();
+
+
+}
+
 void debugMyString() {
+    test t;
 
-    Mystring s2("Hello");
-
-    Mystring s5(s2, 1);
-    cout << "s5: " << s5 << endl;
 
 }
 

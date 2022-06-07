@@ -139,13 +139,21 @@ char &Mystring::operator[](size_t index) {
 }
 
 //实现memcpy
-void *Mystring::memcpy(const Mystring source, size_t num) {
-    char *d = this->m_data;
-    char *s = source.m_data;
-    for (int i = 0; i < num; i++) {
+void *Mystring::memcpy(void *dest, const void *src, size_t num) {
+    // 当目标或源为空时，返回错误
+    if (dest == nullptr || src == nullptr) {
+        throw std::runtime_error("dest or src is nullptr");
+    }
+    //当目标和源一致，直接返回
+    if (dest == src) {
+        return dest;
+    }
+    char *d = (char *) dest;
+    const char *s = (const char *) src;
+    for (size_t i = 0; i < num; i++) {
         d[i] = s[i];
     }
-    return this;
+    return dest;
 }
 
 //实现memmove
@@ -171,14 +179,7 @@ void *Mystring::memmove(void *dest, const void *source, size_t count) {
 
 //实现strcpy
 char *Mystring::strcpy(char *cpy, const char *src) {
-    int i = 0;
-    //拷贝原字符串到目标字符串
-    while (src[i] != '\0') {
-        cpy[i] = src[i];
-        i++;
-    }
-    cpy[i] = '\0';
-    return cpy;
+    return (char *) memcpy(cpy, src, strlen(src) + 1);
 }
 
 //实现strncpy
@@ -190,7 +191,7 @@ char *Mystring::strncpy(char *destination, const char *source, size_t num) {
         i++;
     }
     //将目标字符串中剩余的字符设置为'\0'
-    while (i < num) {
+    while (i < strlen(destination)) {
         destination[i] = '\0';
         i++;
     }
@@ -198,22 +199,30 @@ char *Mystring::strncpy(char *destination, const char *source, size_t num) {
 }
 
 //实现strcat
-char *Mystring::strcat(const char *source) {
-    char *dest = this->m_data;
+char *Mystring::strcat(char *d, const char *s) {
+    //make sure destination and source is not overlap
+    if ((d < s && (d + strlen(d) > s)) || (s < d && s + strlen(s) > d)) {
+        throw std::runtime_error("destination and source is overlap");
+    }
+    if (d == s) {
+        return d;
+    }
     int i = 0;
     int j = 0;
-    //找到字符串的末尾
-    while (dest[i] != '\0') {
+    //定位字符串的末尾
+    while (d[i] != '\0') {
         i++;
     }
-    //拷贝字符串
-    while (source[j] != '\0') {
-        dest[i] = source[j];
+    //拷贝源字符串中的字符到目标字符串
+    //直到源字符串的末尾 或者 目标字符串最大长度
+    size_t n = strlen(s);
+    while (s[j] != '\0' && j < n) {
+        d[i] = s[j];
         i++;
         j++;
     }
-    dest[i] = '\0';
-    return dest;
+    d[i] = '\0';
+    return d;
 }
 
 //实现strncat
@@ -236,6 +245,10 @@ char *Mystring::strncat(char *destination, const char *source, size_t num) {
 
 //实现memcmp
 int Mystring::memcmp(const void *ptr1, const void *ptr2, size_t num) {
+//    把存储区 str1 和存储区 str2 的前 n 个字节进行比较
+//    如果返回值 < 0，则表示 str1 小于 str2。
+//    如果返回值 > 0，则表示 str1 大于 str2。
+//    如果返回值 = 0，则表示 str1 等于 str2。
     char *p1 = (char *) ptr1;
     char *p2 = (char *) ptr2;
     //遍历num个字符
@@ -252,6 +265,7 @@ int Mystring::memcmp(const void *ptr1, const void *ptr2, size_t num) {
 
 //实现strcmp
 int Mystring::strcmp(const char *str1, const char *str2) {
+
     int i = 0;
     //遍历str1和str2中的字符,比较大小
     while (str1[i] != '\0' && str2[i] != '\0') {
@@ -282,6 +296,10 @@ int Mystring::strcoll(const char *str1, const char *str2) {
 
 //实现strncmp
 int Mystring::strncmp(const char *str1, const char *str2, size_t num) {
+    /*把 str1 和 str2 进行比较，最多比较前 n 个字节
+    如果返回值 < 0，则表示 str1 小于 str2。
+    如果返回值 > 0，则表示 str1 大于 str2。
+    如果返回值 = 0，则表示 str1 等于 str2。*/
     int i = 0;
     //遍历num个字符
     while (str1[i] != '\0' && str2[i] != '\0' && i < num) {
@@ -303,6 +321,7 @@ int Mystring::strncmp(const char *str1, const char *str2, size_t num) {
 
 //实现strxfrm
 size_t Mystring::strxfrm(char *destination, const char *source, size_t num) {
+//    根据程序当前的区域选项中的 LC_COLLATE 来转换字符串 src 的前 n 个字符，并把它们放置在字符串 dest 中
     //简单实现，直接拷贝source到destination
     int i = 0;
     while (source[i] != '\0' && i < num) {
@@ -316,6 +335,8 @@ size_t Mystring::strxfrm(char *destination, const char *source, size_t num) {
 
 //实现memchr
 void *Mystring::memchr(const void *ptr, int value, size_t num) {
+//    在参数 str 所指向的字符串的前 n 个字节中搜索第一次出现字符 c（一个无符号字符）的位置。
+
     char *p = (char *) ptr;
     //遍历num个字符
     for (int i = 0; i < num; i++) {
@@ -324,11 +345,13 @@ void *Mystring::memchr(const void *ptr, int value, size_t num) {
             return p + i;
         }
     }
-    return NULL;
+    return nullptr;//没有找到value，返回NULL
 }
 
 //实现strchr
 char *Mystring::strchr(const char *str, int value) {
+//  在参数 str 所指向的字符串中搜索第一次出现字符 c（一个无符号字符）的位置。
+
     int i = 0;
     //遍历str中的字符
     while (str[i] != '\0') {
@@ -343,12 +366,14 @@ char *Mystring::strchr(const char *str, int value) {
 
 //实现strcspn
 size_t Mystring::strcspn(const char *str1, const char *str2) {
+//  返回 str1 中首次出现 str2 中的字符的位置，如果没有出现，则返回 str1 的长度。
+
     int i = 0;
     //遍历str1中的字符
     while (str1[i] != '\0') {
-        //str2中的字符与str1中的字符相等，返回该字符的地址
+        //检查当前选中的 str1 的字符是否在 str2 中出现
         if (strchr(str2, str1[i]) != NULL) {
-            return i;
+            return i; //出现则返回当前位置
         }
         i++;
     }
@@ -357,6 +382,8 @@ size_t Mystring::strcspn(const char *str1, const char *str2) {
 
 //实现strpbrk
 char *Mystring::strpbrk(char *str1, const char *str2) {
+//  检索字符串 str1 中第一个匹配字符串 str2 中字符的字符，不包含空结束字符
+
     int i = 0;
     //遍历str1中的字符
     while (str1[i] != '\0') {
@@ -651,19 +678,60 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
     return 0;
 }
 
-Mystring Mystring::operator=(const Mystring &str) {
-    //如果自身与参数str指向同一个字符串，则直接返回自身
-    if (&str == this) {
-        return *this;
+//实现 =运算符重载
+Mystring &Mystring::operator=(const Mystring &str) {
+    // override operator =
+    // 如果自赋值，则直接返回，否则释放原有内存，再申请新内存，拷贝字符串
+    if (this != &str) {
+        delete[] this->m_data;
+        this->m_data = new char[strlen(str.m_data) + 1];
+        this->m_length = str.m_length;
+        this->m_capacity = str.m_capacity;
+        strcpy(this->m_data, str.m_data);
     }
-        //如果自身与参数str指向不同的字符串，则释放自身所指向的字符串，并为自身重新赋值
-    else {
-        delete[] m_data;
-        m_data = new char[strlen(str.m_data) + 1];
-        strcpy(m_data, str.m_data);
-        return *this;
-    }
+    return *this;
 }
+
+Mystring &Mystring::operator=(const char *str) {
+    // override operator =
+    if (this->m_data != str) {
+        delete[] this->m_data;
+        this->m_data = new char[strlen(str) + 1];
+        strcpy(this->m_data, str);
+    }
+    return *this;
+}
+
+Mystring &Mystring::operator=(char c) {
+    // override operator =
+    if (this->m_data != &c) {
+        delete[] this->m_data;
+        this->m_data = new char[2];
+        this->m_data[0] = c;
+        this->m_data[1] = '\0';
+    }
+    return *this;
+}
+
+//TODO 实现迭代器
+//Iterator Mystring::begin() {
+//    return Iterator(this, 0);
+//}
+
+
+
+//    //如果自身与参数str指向同一个字符串，则直接返回自身
+//    if (&str == this) {
+//        return *this;
+//    }
+//        //如果自身与参数str指向不同的字符串，则释放自身所指向的字符串，并为自身重新赋值
+//    else {
+//        delete[] m_data;
+//        m_data = new char[strlen(str.m_data) + 1];
+//        strcpy(m_data, str.m_data);
+//        return *this;
+//    }
+
 
 //重载！=运算符
 
@@ -699,8 +767,6 @@ size_t Mystring::capacity() const {
 //运算符重载
 Mystring &operator+(const Mystring &left, const Mystring &right) {
     Mystring result;
-    result += left;
-    result += right;
     return result;
 }
 
@@ -721,6 +787,8 @@ Mystring &Mystring::operator+=(const Mystring &s) {
 Mystring::~Mystring() {
     delete[] m_data;
 }
+
+
 
 
 

@@ -18,6 +18,31 @@ public:
 
     void test_memmove();
 
+    void test_strcpy();
+
+    void test_strncpy();
+
+    void test_strcat();
+
+    void test_strncat();
+
+    void test_memcmp();
+
+    void test_strncmp();
+
+    void test_strxfrm();
+
+    void test_memchr();
+
+    void test_strchr();
+
+    void test_strcspn();
+
+    void test_strpbrk();
+
+    void test_strrchr();
+
+
     void test_stoi();
 
     void test_stol();
