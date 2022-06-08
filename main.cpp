@@ -34,6 +34,8 @@ void debugPass() {
 
 void debugMyString() {
     test t;
+//    t.test_strpbrk();
+    t.test_strchr();
 
 
 }
@@ -41,5 +43,19 @@ void debugMyString() {
 int main() {
 //    debugString();
     debugMyString();
-    return 0;
+//Mystring s1;
+//    char str16[] = "This is a sample string";
+//    char key2[] = "aeiou";
+//    char* pch2;
+//    cout << "Vowels in \"" << str16 << "\" : ";
+//    pch2 = s1.strpbrk(str16, key2);
+//
+//
+//    while (pch2 != nullptr)
+//    {
+//        cout << *pch2 << ' ';
+//        pch2 = s1.strpbrk(pch2 + 1, key2);
+//    }
+//    cout << endl;
+//    return 0;
 }

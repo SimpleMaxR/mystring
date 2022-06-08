@@ -228,8 +228,14 @@ void test::test_strcspn() {
 }
 
 void test::test_strpbrk() {
+    Mystring forTest;
+    char *const str = "abcde2fghi3jk4l";
+    const char *const str2 = "34";
+    char *ret;
 
+    ret = forTest.strpbrk(str, str2);
 
+    cout << "the first pair word is in : " << *ret << endl;
 }
 
 void test::test_strrchr() {

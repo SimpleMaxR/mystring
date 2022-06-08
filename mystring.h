@@ -145,8 +145,6 @@ public:
 
     size_t max_size() const;
 
-    void resize(size_t n);
-
     void resize(size_t n, char c);
 
     size_t capacity() const;

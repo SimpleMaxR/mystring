@@ -389,7 +389,7 @@ char *Mystring::strpbrk(char *str1, const char *str2) {
     while (str1[i] != '\0') {
         //str2中的字符与str1中的字符相等，返回该字符的地址
         if (strchr(str2, str1[i]) != NULL) {
-            return (char *) str1 + i;
+            return (str1 + i);
         }
         i++;
     }
@@ -673,9 +673,78 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
     return result;
 }
 
-//TODO 实现strtoul
+//实现strtoul
 unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
-    return 0;
+#define ULONG_MAX ((unsigned long) -1)
+    const char *s = str;
+    unsigned long acc;
+    int c;
+    unsigned long maxValueWithoutLastDigit;
+    int neg = 0, any, lastDigit;
+
+//跳过空白，c定位到第一个非空白字符，s指向c的下一个字符
+    do {
+        c = *s++;
+    } while (isspace(c));
+
+
+//    定义正负
+    if (c == '-') {
+        neg = 1;
+        c = *s++;
+    } else if (c == '+')
+        c = *s++;
+
+    //利用0x前缀判断是16进制
+    if ((base == 0 || base == 16) &&
+        c == '0' && (*s == 'x' || *s == 'X')) {
+        c = s[1]; //跳过0x
+        s += 2; //跳到c的下一个字符
+        base = 16;
+    }
+
+//    利用0前缀判断是8进制
+    if (base == 0)
+        base = c == '0' ? 8 : 10;
+
+    maxValueWithoutLastDigit = neg ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
+    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
+    maxValueWithoutLastDigit /= (unsigned long) base;
+    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
+
+    for (acc = 0, any = 0;; c = *s++) {
+        if (isdigit(c))
+            c -= '0'; // 如果是数字，则减去'0' ？？？？？
+        else if (isalpha(c))
+            if (isupper(c)) {
+                c -= 'A' - 10;
+            } else {
+                c -= 'a' - 10;
+            } // 如果是字母，则减去字母的值
+        else
+            break; // 如果不是数字或字母，则跳出循环
+
+        if (c >= base)
+            break;
+
+        if (any < 0 || acc > maxValueWithoutLastDigit || (acc == maxValueWithoutLastDigit && c > lastDigit))
+            any = -1; //标记为溢出
+        else {
+            any = 1;    //标记为有效
+            acc *= base;    //转换为base进制
+            acc += c;    //加上当前的数字
+        }
+    }
+
+    if (any < 0) {
+        acc = neg ? LONG_MIN : LONG_MAX;
+        throw "overflow";
+    } else if (neg)
+        acc = -acc; //如果是负数，则取反
+    if (endptr != 0)
+        *endptr = (char *) (any ? s - 1 : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
+
+    return (acc); //返回转换后的数字, 大功告成！！！！！！
 }
 
 //实现 =运算符重载
@@ -705,8 +774,10 @@ Mystring &Mystring::operator=(const char *str) {
 Mystring &Mystring::operator=(char c) {
     // override operator =
     if (this->m_data != &c) {
-        delete[] this->m_data;
-        this->m_data = new char[2];
+        delete[] this->m_data;//释放原有内存
+        this->m_data = new char[2]; // 分配一个字符的内存
+        this->m_length = 1; // 字符串长度为1
+        this->m_capacity = 15;// 字符串容量为15
         this->m_data[0] = c;
         this->m_data[1] = '\0';
     }
@@ -732,12 +803,88 @@ Mystring &Mystring::operator=(char c) {
 //        return *this;
 //    }
 
+//实现size()函数
+size_t Mystring::size() const {
+    return m_length; //返回字符串长度
+}
+
+//实现length()函数
+size_t Mystring::length() const {
+    return m_length; //返回字符串长度
+}
+
+//实现max_size
+size_t Mystring::max_size() const {
+    size_t t = -1;
+    return t;//返回字符串最大容量 （size_t 类型的最大值）
+}
+
+//实现resize (使用’\0’作为默认参数，省去一次重载）
+void Mystring::resize(size_t n, char c = '\0') {
+    //如果n小于字符串长度，则截断字符串
+    if (n < m_length) {
+        m_data[n] = '\0';
+        m_length = n;
+    }
+        //如果n大于字符串长度，则扩展字符串
+    else if (n > m_length) {
+        //如果字符串容量不足，则扩展字符串容量
+        if (n > m_capacity) {
+            char *temp = new char[n + 1];
+            strcpy(temp, m_data);
+            delete[] m_data;
+            m_data = temp;
+            m_capacity = n;
+        }
+        //如果字符串容量足够，则在字符串末尾添加字符c
+        for (size_t i = m_length; i < n; i++) {
+            m_data[i] = c;
+        }
+        m_data[n] = '\0';
+        m_length = n;
+    }
+}
+
+//实现capacity()函数
+size_t Mystring::capacity() const {
+    return this->m_capacity;
+}
+
+//实现reserve
+void Mystring::reserve(Mystring s, size_t n = 0) {
+//    Requests that the string capacity be adapted to a planned change in size to a length of up to n characters.
+//    If n is 0, this function has no effect.
+//    If n is greater than the current capacity, the function increases the capacity to n.
+//    If n is less than the current capacity, the function does nothing.
+    if (n > m_capacity) {
+        char *temp = new char[n + 1];
+        setNewCapacity(temp, n);
+        strcpy(temp, m_data);
+        delete[] m_data;
+        m_data = temp;
+        m_capacity = n;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+//其他
+
 
 //重载！=运算符
 
 //int operator!=(const Mystring *str1, const Mystring *str2) {
 //    return strcmp(str1, str2) != 0;
 //}
+
+
 
 //实现strlen
 size_t Mystring::strlen() const {
@@ -756,13 +903,7 @@ size_t Mystring::strlen(const char *str) {
     return i;
 }
 
-size_t Mystring::length() const {
-    return this->m_length;
-}
 
-size_t Mystring::capacity() const {
-    return this->m_capacity;
-}
 
 //运算符重载
 Mystring &operator+(const Mystring &left, const Mystring &right) {
@@ -787,6 +928,15 @@ Mystring &Mystring::operator+=(const Mystring &s) {
 Mystring::~Mystring() {
     delete[] m_data;
 }
+
+void Mystring::setNewCapacity(size_t newCapacity) {
+    char *temp = new char[newCapacity + 1];
+    strcpy(temp, m_data);
+    delete[] m_data;
+    m_data = temp;
+    m_capacity = newCapacity;
+}
+
 
 
 
