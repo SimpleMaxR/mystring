@@ -149,7 +149,7 @@ public:
 
     size_t capacity() const;
 
-    void reserve(size_t n = 0);
+    void reserve(Mystring s, size_t n = 0);
 
     void clear();
 
@@ -181,9 +181,9 @@ public:
 
     Mystring &operator+=(char c);
 
-    Mystring &append(const Mystring &str);
+    Mystring &append(Mystring &first, const Mystring &last);
 
-    Mystring &append(const Mystring &str, size_t subpos, size_t sublen);
+    Mystring &append(Mystring &first, const Mystring &str, size_t subpos, size_t sublen);
 
     Mystring &append(const char *s);
 
@@ -298,6 +298,26 @@ public:
 
     size_t find_last_of(char c, size_t pos = npos) const;
 
+    size_t find_first_not_of(const Mystring &str, size_t pos = 0) const;
+
+    size_t find_first_not_of(const char *s, size_t pos = 0) const;
+
+    size_t find_first_not_of(const char *s, size_t pos, size_t n) const;
+
+    size_t find_first_not_of(char c, size_t pos = 0) const;
+
+    size_t find_last_not_of(const Mystring &str, size_t pos = npos) const;
+
+    size_t find_last_not_of(const char *s, size_t pos = npos) const;
+
+    size_t find_last_not_of(const char *s, size_t pos, size_t n) const;
+
+    size_t find_last_not_of(char c, size_t pos = npos) const;
+
+    Mystring substr(size_t pos = 0, size_t len = npos) const;
+
+    int compare(const Mystring &str) const;
+
 
     //    other
     void *memset(void *ptr, int value, size_t num);
@@ -306,7 +326,10 @@ public:
 
     size_t strlen(const char *str);
 
+    size_t strlen(const char *str) const;
+
     char *strerror(int errnum);
+
 
 public:
     ~Mystring();
@@ -318,6 +341,12 @@ private:
     size_t m_capacity;//    字符串容量
 
     inline void setNewCapacity(size_t newCapacity);
+
+    void setNewCapacity(size_t newCapacity, Mystring s);
+
+    void setNewLength(size_t newLength);
+
+    void setNewLength(size_t newLength, Mystring s);
 
 };
 

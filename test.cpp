@@ -238,8 +238,12 @@ void test::test_strpbrk() {
     cout << "the first pair word is in : " << *ret << endl;
 }
 
-void test::test_strrchr() {
-
+void test::test_append() {
+    Mystring forTest;
+    Mystring str = "hello";
+    Mystring str2 = "world";
+//    cout << forTest.append(str, str2) << endl;
+    cout << forTest.append(str, str2, 2, 2) << endl;
 }
 
 

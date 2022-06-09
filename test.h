@@ -48,6 +48,10 @@ public:
     void test_stol();
 
     void test_strtol();
+
+
+    void test_append();
+
 };
 
 

@@ -11,28 +11,24 @@ using namespace std;
 
 //默认构造函数 default constructor
 Mystring::Mystring() {
-    m_capacity = 0;
-    m_length = 0;
-    m_data = new char[m_capacity + 1];
-    m_data[m_length] = '\0';
+    m_capacity = 15; //默认容量
+    m_length = 0;   //默认长度
+    m_data = new char[m_length + 1]; //动态分配空间
+    m_data[m_length] = '\0'; //结束符
 }
 
 //拷贝构造函数 copy constructor
 Mystring::Mystring(const Mystring &source) {
-    //分别设置容量，长度，数据成员指针
-    m_length = source.m_length;
-    m_capacity = source.m_capacity;
-    m_data = new char[m_capacity + 1];
+    setNewLength(source.m_length);//设置新长度，容量将在函数中维护
+    m_data = new char[m_length + 1];
     strcpy(m_data, source.m_data);  //拷贝源字符串
 }
 
 //实现 substring constructor
 Mystring::Mystring(const Mystring &str, size_t pos, size_t len) {
-    //分别设置容量，长度，数据成员指针
-    m_length = str.length();
-    m_capacity = str.capacity();
-    m_data = new char[m_capacity];
-    strncpy(m_data, str.m_data + pos, str.length());  //拷贝源字符串
+    setNewLength(str.length() - pos);//设置新长度，容量将在函数中维护
+    m_data = new char[m_capacity + 1];
+    strncpy(m_data, str.m_data + pos, str.length());  //从str拷贝str.length()个字符到m_data
     m_data[len] = '\0';
 }
 //    if (pos > str.length()) {
@@ -50,23 +46,27 @@ Mystring::Mystring(const Mystring &str, size_t pos, size_t len) {
 //    this->m_length = len;
 //}
 
-//值传递构造函数 from c-string
+// from c-string
 Mystring::Mystring(const char *s) {
+    m_length = 0;
+    m_capacity = 15;
     //判断是否为空
     if (s == nullptr) {
         //创建空字符串
-        m_capacity = 0;
-        m_length = 0;
-        m_data = new char[m_capacity + 1];
+        m_capacity = 15;
+        this->m_length = 0;
+        m_data = new char[m_length + 1];
         *m_data = '\0';
     } else {
         m_length = strlen(s); //设置容量为源字符串长度
+
         if (m_length > INT_MAX) {
             m_capacity = INT_MAX; //如果长度超过INT_MAX，则容量设置为INT_MAX
         } else {
-            m_capacity = m_length; //否则容量设置为长度
+            setNewCapacity(m_length); //否则根据长度设置容量
         }
-        m_data = new char[m_capacity + 1];  //分配空间
+
+        m_data = new char[m_length + 1];  //分配空间
         strcpy(m_data, s);  //拷贝源字符串
     }
 }
@@ -122,20 +122,6 @@ std::ostream &operator<<(std::ostream &os, const Mystring &s) {
 std::istream &operator>>(std::istream &is, Mystring &s) {
     is >> s.m_data;
     return is;
-}
-
-//重载【】运算符
-char Mystring::operator[](size_t index) const {
-    if (index < 0)
-        throw std::runtime_error("index is < 0");
-    if (index > 0)
-        throw std::runtime_error("index is > 0");
-    return m_data[index];
-}
-
-char &Mystring::operator[](size_t index) {
-    if (index >= strlen(m_data)) throw 1;
-    return m_data[index];
 }
 
 //实现memcpy
@@ -412,7 +398,7 @@ char *Mystring::strrchr(const char *str, int value) {
 
 //实现strspn
 size_t Mystring::strspn(const char *str1, const char *str2) {
-    //检索字符串 str1 中第一个不在字符串 str2 中出现的字符下标。
+    //检索字符串 str1 中第一个不在字符串 str2 中出现的字符的下标。
     int i = 0;
     //遍历str1中的字符
     while (str1[i] != '\0' && strchr(str2, str1[i]) != NULL) {
@@ -437,8 +423,9 @@ char *Mystring::strstr(const char *str1, const char *str2) {
 }
 
 
-//实现strtok TODO 实现strtok
+//实现strtok TODO实现strtok
 char *Mystring::strtok(char *str, const char *delim) {
+//    分解字符串 str 为一组字符串，delim 为分隔符。
     static char *p = NULL;
     if (str != NULL) {
         p = str;
@@ -446,13 +433,13 @@ char *Mystring::strtok(char *str, const char *delim) {
     if (p == NULL) {
         return NULL;
     }
-    //检索字符串 str 中第一个不在字符串 delim 中出现的字符下标。
-    int i = strspn(p, delim);
+
+    int i = strspn(p, delim);   //检索字符串 str 中第一个不在字符串 delim 中出现的字符下标。
     if (p[i] == '\0') {
         return NULL;
     }
     char *token = p + i;
-    p = strpbrk(token, delim);
+    p = strpbrk(token, delim); //检索字符串 str 中第一个在字符串 delim 中出现的字符下标。
     if (p == NULL) {
         p = NULL;
     } else {
@@ -461,6 +448,45 @@ char *Mystring::strtok(char *str, const char *delim) {
     }
     return token;
 }
+
+//char* Mystring::strtok(char* str, const char* delimiters) {
+//    static char *pstr = nullptr;
+//
+//    if (str == nullptr && pstr == nullptr)
+//        return nullptr;
+//        //strtok函数第一个参数不为nullptr，函数将找到str中第一个标记，
+//        //strtok函数将保存它在字符串中的位置。
+//    else if (str != nullptr) {
+//        int counter1 = 0;
+//        for (int i = 0; *(str + counter1) != *(delimiters + i); i++) {
+//            if (*(delimiters + i) == '\0') {
+//                counter1++;
+//                i = -1;
+//            }
+//            if (*(str + counter1) == '\0')
+//                return nullptr;
+//        }
+//        *(str + counter1) = '\0';
+//        pstr = str + counter1;
+//        return pstr;
+//    }
+//
+//        //strtok函数第一个参数为nullptr，函数在同一个字符串中被保存的位置开始，直接找下一个标记
+//    else if (str == nullptr && pstr != nullptr) {
+//        int counter2 = 1;
+//        for (int i = 0; *(pstr + counter2) != *(delimiters + i); i++) {
+//            if (*(delimiters + i) == '\0') {
+//                counter2++;
+//                i = -1;
+//            }
+//            if (*(pstr + counter2) == '\0')
+//                return nullptr;
+//        }
+//        *(pstr + counter2) = '\0';
+//        pstr = pstr + counter2;
+//        return pstr;
+//    }
+//}
 
 //实现memset TODO 实现memset
 void *Mystring::memset(void *ptr, int value, size_t num) {
@@ -674,78 +700,78 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
 }
 
 //实现strtoul
-unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
-#define ULONG_MAX ((unsigned long) -1)
-    const char *s = str;
-    unsigned long acc;
-    int c;
-    unsigned long maxValueWithoutLastDigit;
-    int neg = 0, any, lastDigit;
-
-//跳过空白，c定位到第一个非空白字符，s指向c的下一个字符
-    do {
-        c = *s++;
-    } while (isspace(c));
-
-
-//    定义正负
-    if (c == '-') {
-        neg = 1;
-        c = *s++;
-    } else if (c == '+')
-        c = *s++;
-
-    //利用0x前缀判断是16进制
-    if ((base == 0 || base == 16) &&
-        c == '0' && (*s == 'x' || *s == 'X')) {
-        c = s[1]; //跳过0x
-        s += 2; //跳到c的下一个字符
-        base = 16;
-    }
-
-//    利用0前缀判断是8进制
-    if (base == 0)
-        base = c == '0' ? 8 : 10;
-
-    maxValueWithoutLastDigit = neg ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
-    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
-    maxValueWithoutLastDigit /= (unsigned long) base;
-    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
-
-    for (acc = 0, any = 0;; c = *s++) {
-        if (isdigit(c))
-            c -= '0'; // 如果是数字，则减去'0' ？？？？？
-        else if (isalpha(c))
-            if (isupper(c)) {
-                c -= 'A' - 10;
-            } else {
-                c -= 'a' - 10;
-            } // 如果是字母，则减去字母的值
-        else
-            break; // 如果不是数字或字母，则跳出循环
-
-        if (c >= base)
-            break;
-
-        if (any < 0 || acc > maxValueWithoutLastDigit || (acc == maxValueWithoutLastDigit && c > lastDigit))
-            any = -1; //标记为溢出
-        else {
-            any = 1;    //标记为有效
-            acc *= base;    //转换为base进制
-            acc += c;    //加上当前的数字
-        }
-    }
-
-    if (any < 0) {
-        acc = neg ? LONG_MIN : LONG_MAX;
-        throw "overflow";
-    } else if (neg)
-        acc = -acc; //如果是负数，则取反
-    if (endptr != 0)
-        *endptr = (char *) (any ? s - 1 : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
-
-    return (acc); //返回转换后的数字, 大功告成！！！！！！
-}
+//unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
+//#define ULONG_MAX ((unsigned long) -1)
+//    const char *s = str;
+//    unsigned long acc;
+//    int c;
+//    unsigned long maxValueWithoutLastDigit;
+//    int neg = 0, any, lastDigit;
+//
+////跳过空白，c定位到第一个非空白字符，s指向c的下一个字符
+//    do {
+//        c = *s++;
+//    } while (isspace(c));
+//
+//
+////    定义正负
+//    if (c == '-') {
+//        neg = 1;
+//        c = *s++;
+//    } else if (c == '+')
+//        c = *s++;
+//
+//    //利用0x前缀判断是16进制
+//    if ((base == 0 || base == 16) &&
+//        c == '0' && (*s == 'x' || *s == 'X')) {
+//        c = s[1]; //跳过0x
+//        s += 2; //跳到c的下一个字符
+//        base = 16;
+//    }
+//
+////    利用0前缀判断是8进制
+//    if (base == 0)
+//        base = c == '0' ? 8 : 10;
+//
+//    maxValueWithoutLastDigit = neg ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
+//    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
+//    maxValueWithoutLastDigit /= (unsigned long) base;
+//    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
+//
+//    for (acc = 0, any = 0;; c = *s++) {
+//        if (isdigit(c))
+//            c -= '0'; // 如果是数字，则减去'0' ？？？？？
+//        else if (isalpha(c))
+//            if (isupper(c)) {
+//                c -= 'A' - 10;
+//            } else {
+//                c -= 'a' - 10;
+//            } // 如果是字母，则减去字母的值
+//        else
+//            break; // 如果不是数字或字母，则跳出循环
+//
+//        if (c >= base)
+//            break;
+//
+//        if (any < 0 || acc > maxValueWithoutLastDigit || (acc == maxValueWithoutLastDigit && c > lastDigit))
+//            any = -1; //标记为溢出
+//        else {
+//            any = 1;    //标记为有效
+//            acc *= base;    //转换为base进制
+//            acc += c;    //加上当前的数字
+//        }
+//    }
+//
+//    if (any < 0) {
+//        acc = neg ? LONG_MIN : LONG_MAX;
+//        throw "overflow";
+//    } else if (neg)
+//        acc = -acc; //如果是负数，则取反
+//    if (endptr != 0)
+//        *endptr = (char *) (any ? s - 1 : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
+//
+//    return (acc); //返回转换后的数字, 大功告成！！！！！！
+//}
 
 //实现 =运算符重载
 Mystring &Mystring::operator=(const Mystring &str) {
@@ -851,14 +877,14 @@ size_t Mystring::capacity() const {
 }
 
 //实现reserve
-void Mystring::reserve(Mystring s, size_t n = 0) {
+void Mystring::reserve(Mystring s, size_t n) {
 //    Requests that the string capacity be adapted to a planned change in size to a length of up to n characters.
 //    If n is 0, this function has no effect.
 //    If n is greater than the current capacity, the function increases the capacity to n.
 //    If n is less than the current capacity, the function does nothing.
     if (n > m_capacity) {
         char *temp = new char[n + 1];
-        setNewCapacity(temp, n);
+        setNewCapacity(n, temp);
         strcpy(temp, m_data);
         delete[] m_data;
         m_data = temp;
@@ -866,6 +892,194 @@ void Mystring::reserve(Mystring s, size_t n = 0) {
     }
 
 }
+
+//实现clear
+void Mystring::clear() {
+    //清空字符串
+    delete[] this->m_data;
+}
+
+//实现empty
+bool Mystring::empty() const {
+    //如果字符串长度为0，则返回true
+    if (this->m_length == 0) {
+        return true;
+    }
+}
+
+//实现shrink_to_fit
+void Mystring::shrink_to_fit() {
+    //请求精简字符串容量
+    size_t n = strlen(m_data);
+    n = this->m_capacity - this->strlen(m_data);
+    if (n > 15) {
+        while (n > 15) {
+            n = n / 2;
+        }
+        setNewCapacity(n / 15);
+    }
+}
+
+//重载【】运算符
+char Mystring::operator[](size_t index) const {
+    if (index < 0)
+        throw std::runtime_error("index is < 0");
+    if (index > 0)
+        throw std::runtime_error("index is > 0");
+    return m_data[index];
+}
+
+char &Mystring::operator[](size_t index) {
+    if (index >= strlen(m_data)) throw 1;
+    return m_data[index];
+}
+
+//实现at
+char &Mystring::at(size_t pos) {
+    if (pos >= strlen(m_data) || pos < 0) throw "Out of range";
+    return m_data[pos];
+}
+
+const char &Mystring::at(size_t pos) const {
+    if (pos >= strlen(m_data) || pos < 0) throw "Out of range";
+    return m_data[pos];
+}
+
+char &Mystring::back() {
+    if (m_length == 0) throw "Out of range";
+    return m_data[m_length - 1];
+}
+
+const char &Mystring::back() const {
+    if (m_length == 0) throw "Out of range";
+    return m_data[m_length - 1];
+}
+
+char &Mystring::front() {
+    return m_data[0];
+}
+
+const char &Mystring::front() const {
+    return m_data[0];
+}
+
+//+=运算符重载
+Mystring &Mystring::operator+=(const Mystring &s) {
+    unsigned length = this->strlen() + s.strlen();
+    char *str = new char[length];
+
+    for (unsigned j = 0; j < length; j++) {
+        str[j] = m_data[j];
+    }
+    for (unsigned i = 0; i < s.strlen(); i++) {
+        str[i + this->strlen()] = s.m_data[i];
+    }
+    return *this;
+}
+
+Mystring &Mystring::operator+=(const char *&s) {
+    unsigned length = this->strlen() + strlen(s);
+    char *str = new char[length];
+
+    for (unsigned j = 0; j < length; j++) {
+        str[j] = m_data[j];
+    }
+    for (unsigned i = 0; i < strlen(s); i++) {
+        str[i + this->strlen()] = s[i];
+    }
+    return *this;
+}
+
+Mystring &Mystring::operator+=(char c) {
+    unsigned length = this->strlen() + 1;
+    char *str = new char[length];
+
+    for (unsigned j = 0; j < length; j++) {
+        str[j] = m_data[j];
+    }
+    str[length - 1] = c;
+    return *this;
+}
+
+Mystring &Mystring::append(Mystring &first, const Mystring &last) {
+//    在string末尾添加str
+    unsigned oldLength = first.strlen(); //保存原来的长度，用于比较
+    setNewLength(oldLength + last.m_length + 1); //设置新的长度为旧长度加str长度(容量由setNewLength维护)
+
+    if (strlen(last.m_data)) { //last长度不为0，则拷贝str的内容
+        strncpy(first.m_data + oldLength, last.m_data, strlen(last.m_data)); //拷贝last的内容到first的末尾
+    } else {
+        return first; //last长度为0，则直接返回first
+    }
+    return first;
+}
+
+Mystring &Mystring::append(Mystring &first, const Mystring &str, size_t subpos, size_t sublen) {
+    //add str to first, starting at position subpos, for sublen characters
+    if (subpos < 0 || subpos > first.strlen()) {
+        throw "subpos is out of range";
+    }
+    if (sublen < 0 || sublen > str.strlen()) {
+        throw "sublen is out of range";
+    }
+
+    unsigned oldLength = first.strlen(); //保存原来的长度
+    char *pos = str.m_data + subpos;    //设置pos指向开始拷贝位置
+    char *end = str.m_data + subpos + sublen;   //设置end指向结束拷贝位置
+    while (pos < end) {
+        first.m_data[oldLength++] = *pos++;
+    }
+    return first;
+}
+
+//
+//Mystring &Mystring::append(const char *s) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::append(const char *s, size_t n) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::append(size_t n, char c) {
+//    return <#initializer#>;
+//}
+//
+//template<class InputIterator>
+//Mystring &Mystring::append(InputIterator first, InputIterator last) {
+//    return <#initializer#>;
+//}
+//
+//void Mystring::push_back(char c) {
+//
+//}
+//
+//Mystring &Mystring::assign(const Mystring &str) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::assign(const Mystring &str, size_t subpos, size_t sublen) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::assign(const char *s) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::assign(const char *s, size_t n) {
+//    return <#initializer#>;
+//}
+//
+//Mystring &Mystring::assign(size_t n, char c) {
+//    return <#initializer#>;
+//}
+
+
+
+
+
+
+
 
 
 
@@ -903,6 +1117,13 @@ size_t Mystring::strlen(const char *str) {
     return i;
 }
 
+size_t Mystring::strlen(const char *str) const {
+    int i = 0;
+    while (str[i] != '\0') {
+        ++i;
+    }
+    return i;
+}
 
 
 //运算符重载
@@ -911,34 +1132,38 @@ Mystring &operator+(const Mystring &left, const Mystring &right) {
     return result;
 }
 
-Mystring &Mystring::operator+=(const Mystring &s) {
-    unsigned length = this->strlen() + s.strlen();
-    char *str = new char[length];
 
-    for (unsigned j = 0; j < length; j++) {
-        str[j] = m_data[j];
+void Mystring::setNewCapacity(size_t newCapacity) {
+    while (newCapacity > m_capacity) {
+        m_capacity *= 2;
     }
-    for (unsigned i = 0; i < s.strlen(); i++) {
-        str[i + this->strlen()] = s.m_data[i];
+}
+
+void Mystring::setNewCapacity(size_t n, Mystring s) {
+    while (n > s.m_capacity) {
+        s.m_capacity *= 2;
     }
-    return *this;
+}
+
+void Mystring::setNewLength(size_t newLength) {
+    if (newLength > m_capacity) {
+        setNewCapacity(newLength);
+    }
+    m_length = newLength;
+}
+
+void Mystring::setNewLength(size_t newLength, Mystring s) {
+    if (newLength > s.m_capacity) {
+        setNewCapacity(newLength, s);
+    }
+    s.m_length = newLength;
 }
 
 //析构函数
 Mystring::~Mystring() {
     delete[] m_data;
+
 }
-
-void Mystring::setNewCapacity(size_t newCapacity) {
-    char *temp = new char[newCapacity + 1];
-    strcpy(temp, m_data);
-    delete[] m_data;
-    m_data = temp;
-    m_capacity = newCapacity;
-}
-
-
-
 
 
 
