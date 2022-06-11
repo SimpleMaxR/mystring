@@ -12,8 +12,6 @@ public:
 
     void test_constructor();
 
-    void test_copyConstructor();
-
     void test_memcpy();
 
     void test_memmove();

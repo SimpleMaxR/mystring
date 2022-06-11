@@ -1016,67 +1016,582 @@ Mystring &Mystring::append(Mystring &first, const Mystring &last) {
 
 Mystring &Mystring::append(Mystring &first, const Mystring &str, size_t subpos, size_t sublen) {
     //add str to first, starting at position subpos, for sublen characters
-    if (subpos < 0 || subpos > first.strlen()) {
+    if (subpos < 0 || subpos > str.strlen()) {
         throw "subpos is out of range";
     }
-    if (sublen < 0 || sublen > str.strlen()) {
-        throw "sublen is out of range";
+    if (sublen < 0 || sublen > str.strlen() || sublen == npos) {
+        sublen = str.strlen() - subpos;
     }
 
     unsigned oldLength = first.strlen(); //保存原来的长度
     char *pos = str.m_data + subpos;    //设置pos指向开始拷贝位置
     char *end = str.m_data + subpos + sublen;   //设置end指向结束拷贝位置
+    setNewLength(oldLength + sublen); //设置新的长度为旧长度加要复制的长度(容量由setNewLength维护)
     while (pos < end) {
         first.m_data[oldLength++] = *pos++;
     }
     return first;
 }
 
-//
-//Mystring &Mystring::append(const char *s) {
+
+Mystring &Mystring::append(Mystring &first, const char *s) {
+    //在string末尾添加s
+    unsigned oldLength = first.strlen(); //保存原来的长度，用于比较
+    size_t sLen = strlen(s) + 1; //设置sLen为s的长度(include '\0')
+    setNewLength(first.strlen() + sLen); //设置新的长度为first长度加s长度(容量由setNewLength维护)
+    while (sLen--) {
+        first.m_data[oldLength++] = *s++;
+    }
+    return first;
+}
+
+Mystring &Mystring::append(Mystring &first, const char *s, size_t n) {
+    unsigned oldLength = first.strlen(); //保存原来的长度，用于比较
+    size_t cLen = n < strlen(s) ? n : strlen(s); //如果n比s短，则取n，否则取s的长度
+    setNewLength(first.strlen() + cLen); //设置新的长度为first长度加s长度(容量由setNewLength维护)
+    while (cLen--) {
+        first.m_data[oldLength++] = *s++;
+    }
+    return first;
+}
+
+Mystring &Mystring::append(Mystring &first, size_t n, char c) {
+    unsigned oldLength = first.strlen(); //保存原来的长度，用于比较
+    setNewLength(oldLength + n); //设置新的长度为first长度加n(容量由setNewLength维护)
+    while (n--) {
+        first.m_data[oldLength++] = c;
+    }
+}
+
+//TODO 迭代器
+template<class InputIterator>
+Mystring &Mystring::append(InputIterator first, InputIterator last) {
+//    Appends a copy of the sequence of characters in the range [first,last), in the same order.
+    unsigned oldLength = this->strlen(); //保存原来的长度，用于比较
+    setNewLength(oldLength + std::distance(first, last)); //设置新的长度为first到last的距离(容量由setNewLength维护)
+    while (first != last) {
+        m_data[oldLength++] = *first++;
+    }
+    return *this;
+}
+
+
+void Mystring::push_back(char c) {
+    //在string末尾添加c
+    unsigned oldLength = this->strlen(); //保存原来的长度，用于比较
+    setNewLength(oldLength + 1); //设置新的长度为旧长度加1(容量由setNewLength维护)
+    m_data[oldLength] = c;
+    m_data[oldLength + 1] = '\0';
+    return;
+}
+
+void Mystring::push_back(Mystring &s, char c) {
+    unsigned oldLength = s.strlen(); //保存原来的长度，用于比较
+    s.setNewLength(oldLength + 1); //设置新的长度为旧长度加1(容量由setNewLength维护)
+    s.m_data[oldLength] = c;
+    s.m_data[oldLength + 1] = '\0';
+}
+
+Mystring &Mystring::assign(Mystring &first, const Mystring &str) {
+    //assign str to first
+    first.setNewLength(str.strlen()); //设置新的长度为str长度(容量由setNewLength维护)
+    delete[] first.m_data; //释放原来的内存
+    first.m_data = str.m_data;
+}
+
+Mystring &Mystring::assign(Mystring &first, const Mystring &str, size_t subpos, size_t sublen) {
+//    assign str to first, starting at position subpos, for sublen characters
+    if (subpos < 0 || subpos > str.strlen()) { //如果subpos越界
+        throw "subpos is out of range";
+    }
+    if (sublen > str.strlen() || sublen == npos) {
+        sublen = str.strlen() - subpos;
+    }
+    first.setNewLength(sublen); //设置新的长度为sublen(容量由setNewLength维护)
+    delete[] first.m_data; //释放原来的空间
+    for (int i = 0; i < sublen; i++) {
+        first.m_data[i] = str.m_data[subpos + i];
+    }
+    first.m_data[sublen] = '\0';
+    return first;
+}
+
+Mystring &Mystring::assign(Mystring &first, const char *s) {
+    //assign s to first
+    //make sure s is not null
+    if (s == nullptr) {
+        throw "s is nullptr";
+    } else {
+        first.setNewLength(
+                strlen(s)); //set new length to first with s's length,(capacity is maintained by setNewLength)
+        delete[] first.m_data; //release old memory
+        for (int i = 0; i < strlen(s); i++) {
+            first.m_data[i] = s[i]; //copy s to first
+        }
+        if (first.m_data[first.strlen()] != '\0') {
+            first.m_data[first.strlen()] = '\0'; //if s is not null-terminated, add null-terminator
+        }
+    }
+    return first;
+}
+
+Mystring &Mystring::assign(Mystring &first, const char *s, size_t n) {
+    //assign s to first, for n characters
+    //make sure s is not null
+    if (s == nullptr || n >= strlen(s)) {
+        throw "s is nullptr or n is too large";
+    } else {
+        first.setNewLength(n); //set new length to first with n,(capacity is maintained by setNewLength)
+        delete[] first.m_data; //release old memory
+        for (int i = 0; i < n; i++) {
+            first.m_data[i] = s[i]; //copy s to first
+        }
+        if (first.m_data[first.strlen()] != '\0') {
+            first.m_data[first.strlen()] = '\0'; //if s is not null-terminated, add null-terminator
+        }
+    }
+    return first;
+}
+
+Mystring &Mystring::assign(Mystring &first, size_t n, char c) {
+    //assign n copies of c to first
+    first.setNewLength(n); //set new length to first with n,(capacity is maintained by setNewLength)
+    delete[] first.m_data; //release old memory
+    for (int i = 0; i < n; i++) {
+        first.m_data[i] = c; //copy c to first
+    }
+    first.m_data[n] = '\0'; //add null-terminator
+    return first;
+}
+
+template<class InputIterator>
+Mystring &Mystring::assign(InputIterator first, InputIterator last) {
+    //assign the sequence of characters in the range [first,last) to first
+    //make sure first is not null
+    if (first == nullptr) {
+        throw "first is nullptr";
+    } else {
+        size_t n = std::distance(first, last); //get the distance between first and last
+        first.setNewLength(n); //set new length to first with n,(capacity is maintained by setNewLength)
+        delete[] first.m_data; //release old memory
+        for (int i = 0; i < n; i++) {
+            first.m_data[i] = *first++; //copy first to first
+        }
+        if (first.m_data[first.strlen()] != '\0') {
+            first.m_data[first.strlen()] = '\0'; //if first is not null-terminated, add null-terminator
+        }
+    }
+    return first;
+}
+
+Mystring &Mystring::insert(size_t pos, const Mystring &str, Mystring &first) {
+    //insert str to first in position pos
+    //make sure pos is not out of range
+    if (pos > first.strlen()) {
+        throw "pos is out of range";
+    } else {
+        size_t n = str.strlen(); //get the length of str
+        first.setNewLength(
+                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + n, first.m_data + pos,
+                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        memcpy(first.m_data + pos, str.c_str(), str.size());
+    }
+    return first;
+}
+
+
+Mystring &Mystring::insert(Mystring &first, size_t pos, const Mystring &str, size_t subpos, size_t sublen) {
+    //insert str to first in position pos, starting at position subpos, for sublen characters
+    //make sure pos is not out of range
+    if (pos > first.strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (subpos < 0 || subpos > str.strlen()) { //如果subpos越界
+            throw "subpos is out of range";
+        }
+        if (sublen > str.strlen() || sublen == npos) {
+            sublen = str.strlen() - subpos;
+        }
+        size_t n = sublen; //get the length of str
+        first.setNewLength(
+                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + n, first.m_data + pos,
+                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        memcpy(first.m_data + pos, str.c_str() + subpos, sublen);
+    }
+    return first;
+}
+
+Mystring &Mystring::insert(Mystring &first, size_t pos, const char *s) {
+    //insert s to first in position pos
+    //make sure pos is not out of range
+    if (pos > first.strlen()) {
+        throw "pos is out of range";
+    } else {
+        size_t n = strlen(s); //get the length of s
+        first.setNewLength(
+                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + n, first.m_data + pos,
+                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        memcpy(first.m_data + pos, s, n);
+    }
+    return first;
+}
+
+Mystring &Mystring::insert(Mystring &first, size_t pos, const char *s, size_t n) {
+    //insert s to first in position pos
+    //make sure pos is not out of range
+    if (pos > first.strlen()) {
+        throw "pos is out of range";
+    } else {
+        first.setNewLength(
+                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + n, first.m_data + pos,
+                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        for (int i = 0; i < n; i++) {
+            first.m_data[pos + i] = s[i];
+        }
+    }
+    return first;
+}
+
+Mystring &Mystring::insert(Mystring &first, size_t pos, size_t n, char c) {
+    //insert n copies of c to first in position pos
+    //make sure pos is not out of range
+    if (pos > first.strlen()) {
+        throw "pos is out of range";
+    } else {
+        first.setNewLength(
+                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + n, first.m_data + pos,
+                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        for (int i = 0; i < n; i++) {
+            first.m_data[pos + i] = c; //put n copies of c to first
+        }
+    }
+}
+
+//void Mystring::insert(iterator p, size_t n, char c) {
+//    //insert n copies of c to first in position pos
+//    //make sure pos is not out of range
+//        setNewLength(strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
+//        memmove(m_data + p + n, m_data + p , strlen(m_data) - p + 1); //move the rest of first to the right
+//        for (int i = 0; i < n; i++) {
+//            m_data[p + i] = c; //put n copies of c to first
+//        }
+//}
+
+//iterator Mystring::insert(iterator p, char c) {
+//    //insert c to first in position pos
+//    //make sure pos is not out of range
+//    if (p == end()) {
+//        push_back(c);
+//    } else {
+//        insert(p, 1, c);
+//    }
+//    return p;
+//}
+
+//template<class InputIterator>
+//Mystring &Mystring::insert(iterator p, InputIterator first, InputIterator last) {
 //    return <#initializer#>;
 //}
 //
-//Mystring &Mystring::append(const char *s, size_t n) {
+Mystring &Mystring::erase(size_t pos, size_t len) {
+    //erase len characters from first in position pos
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        memmove(m_data + pos, m_data + pos + len, strlen(m_data) - pos - len + 1);
+        setNewLength(strlen() - len);
+    }
+    return *this;
+}
+
+//iterator Mystring::erase(iterator p) {
+//    return iterator();
+//}
+//
+//iterator Mystring::erase(iterator first, iterator last) {
+//    return iterator();
+//}
+//
+Mystring &Mystring::replace(size_t pos, size_t len, const Mystring &str) {
+    //replace len characters from first in position pos with str
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        memcpy(m_data + pos, str.c_str(), str.strlen());
+        setNewLength(strlen());
+    }
+}
+
+//Mystring &Mystring::replace(iterator i1, iterator i2, const Mystring &str) {
 //    return <#initializer#>;
 //}
 //
-//Mystring &Mystring::append(size_t n, char c) {
+Mystring &Mystring::replace(size_t pos, size_t len, const Mystring *str, size_t subpos, size_t sublen) {
+    //replace len characters from first in position pos with str
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        if (subpos > strlen()) {
+            throw "subpos is out of range";
+        }
+        if (sublen > strlen() || sublen == npos) {
+            sublen = strlen() - subpos;
+        }
+        memcpy(m_data + pos, str->c_str() + subpos, sublen);
+        setNewLength(strlen());
+    }
+    return *this;
+}
+
+Mystring &Mystring::replace(size_t pos, size_t len, const char *s) {
+    //replace len characters from first in position pos with s
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        memcpy(m_data + pos, s, strlen(s));
+        setNewLength(strlen());
+    }
+    return *this;
+}
+
+//Mystring &Mystring::replace(iterator i1, iterator i2, const char *s) {
+//    return <#initializer#>;
+//}
+//
+Mystring &Mystring::replace(size_t pos, size_t len, const char *s, size_t n) {
+    //replace len characters from first in position pos with s
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        memcpy(m_data + pos, s, n);
+        setNewLength(strlen());
+    }
+    return *this;
+}
+
+//Mystring &Mystring::replace(iterator i1, iterator i2, const char *s, size_t n) {
+//    return <#initializer#>;
+//}
+//
+Mystring &Mystring::replace(size_t pos, size_t len, size_t n, char c) {
+    //replace len characters from first in position pos with n copies of c
+    //make sure pos is not out of range
+    if (pos > strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > strlen() - pos) {
+            len = strlen() - pos;
+        }
+        memset(m_data + pos, c, n);
+        setNewLength(strlen());
+    }
+    return *this;
+}
+
+//Mystring &Mystring::replace(iterator i1, iterator i2, size_t n, char c) {
 //    return <#initializer#>;
 //}
 //
 //template<class InputIterator>
-//Mystring &Mystring::append(InputIterator first, InputIterator last) {
+//Mystring &Mystring::replace(iterator i1, iterator i2, InputIterator first, InputIterator last) {
 //    return <#initializer#>;
 //}
-//
-//void Mystring::push_back(char c) {
-//
+
+void Mystring::swap(Mystring &str) {
+    //swap the contents of str with *this
+    char *temp = str.m_data;
+    str.m_data = m_data;
+    m_data = temp;
+}
+
+void Mystring::pop_back() {
+    //remove the last character from first
+    size_t len = strlen();
+    if (len > 0) {
+        setNewLength(len - 1);
+    }
+}
+
+void Mystring::pop_back(Mystring &s) {
+    //remove the last character from first
+    size_t len = s.strlen();
+    if (len > 0) {
+        s.setNewLength(len - 1);
+    }
+}
+
+const char *Mystring::c_str() const {
+    //return a pointer to the null-terminated string
+    return m_data;
+}
+
+const char *Mystring::data() const {
+    //return a pointer to the null-terminated string
+    return m_data;
+}
+
+allocator_type Mystring::get_allocator() const {
+    //return the allocator object
+    return allocator_type();
+}
+
+size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
+    //copy len characters from src in position pos to s
+    //make sure pos is not out of range
+    if (pos > src.strlen()) {
+        throw "pos is out of range";
+    } else {
+        if (len > src.strlen() - pos) {
+            len = src.strlen() - pos;
+        }
+        memcpy(s, src.c_str() + pos, len);
+    }
+    return len;
+}
+
+//size_t Mystring::find(const Mystring &str, size_t pos) const {
+//    //find
+//}
+
+//size_t Mystring::find(const char *s, size_t pos) const {
+//    return 0;
 //}
 //
-//Mystring &Mystring::assign(const Mystring &str) {
-//    return <#initializer#>;
+//size_t Mystring::find(const char *s, size_t pos, size_t n) const {
+//    return 0;
 //}
 //
-//Mystring &Mystring::assign(const Mystring &str, size_t subpos, size_t sublen) {
-//    return <#initializer#>;
+//size_t Mystring::find(char c, size_t pos) const {
+//    return 0;
 //}
 //
-//Mystring &Mystring::assign(const char *s) {
-//    return <#initializer#>;
+//size_t Mystring::rfind(const Mystring &str, size_t pos) const {
+//    return 0;
 //}
 //
-//Mystring &Mystring::assign(const char *s, size_t n) {
-//    return <#initializer#>;
+//size_t Mystring::rfind(const char *s, size_t pos) const {
+//    return 0;
 //}
 //
-//Mystring &Mystring::assign(size_t n, char c) {
-//    return <#initializer#>;
+//size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
+//    return 0;
+//}
+//
+//size_t Mystring::rfind(char c, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_of(const Mystring &str, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_of(const char *s, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_of(char c, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_of(const char *s, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_of(const char *s, size_t pos, size_t n) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_of(char c, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_not_of(const Mystring &str, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_not_of(const char *s, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_not_of(const char *s, size_t pos, size_t n) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_first_not_of(char c, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_not_of(const Mystring &str, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_not_of(const char *s, size_t pos) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_not_of(const char *s, size_t pos, size_t n) const {
+//    return 0;
+//}
+//
+//size_t Mystring::find_last_not_of(char c, size_t pos) const {
+//    return 0;
+//}
+//
+//Mystring Mystring::substr(size_t pos, size_t len) const {
+//    return Mystring();
+//}
+//
+//int Mystring::compare(const Mystring &str) const {
+//    return 0;
 //}
 
 
 
 
+
+
+
+
+//运算符重载
+
+Mystring &operator+(const Mystring &left, const Mystring &right) {
+    //concatenate two strings
+
+
+}
 
 
 
@@ -1126,26 +1641,24 @@ size_t Mystring::strlen(const char *str) const {
 }
 
 
-//运算符重载
-Mystring &operator+(const Mystring &left, const Mystring &right) {
-    Mystring result;
-    return result;
-}
 
 
 void Mystring::setNewCapacity(size_t newCapacity) {
+    m_capacity = 15; //init capacity value is 15
     while (newCapacity > m_capacity) {
-        m_capacity *= 2;
+        m_capacity *= 2; //capacity should be a multiple of 15
     }
 }
 
 void Mystring::setNewCapacity(size_t n, Mystring s) {
+    s.m_capacity = 15; //init capacity value is 15
     while (n > s.m_capacity) {
-        s.m_capacity *= 2;
+        s.m_capacity *= 2; //capacity should be a multiple of 15
     }
 }
 
 void Mystring::setNewLength(size_t newLength) {
+    // if newLength is longer than capacity for now, make a new capacity
     if (newLength > m_capacity) {
         setNewCapacity(newLength);
     }
@@ -1164,6 +1677,10 @@ Mystring::~Mystring() {
     delete[] m_data;
 
 }
+
+
+
+
 
 
 

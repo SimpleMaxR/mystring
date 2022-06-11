@@ -28,12 +28,6 @@ void test::test_constructor() {
     cout << "s6: " << s6 << endl;
 }
 
-void test::test_copyConstructor() {
-    Mystring s1("Hello");
-    Mystring s2(s1);
-    cout << s2 << endl;
-}
-
 void test::test_memcpy() {
     struct {
         char name[40];

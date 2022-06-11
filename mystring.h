@@ -17,6 +17,14 @@ class Mystring {
 
     friend Mystring &operator+(const Mystring &left, const Mystring &right);
 
+    friend Mystring operator+(const Mystring &lhs, char rhs);
+
+    friend Mystring operator+(const Mystring &lhs, const char *rhs);
+
+    friend Mystring operator+(char lhs, const Mystring &rhs);
+
+    friend Mystring operator+(const char *lhs, const Mystring &rhs);
+
     friend bool operator==(const Mystring &left, const Mystring &right);
 
     friend bool operator!=(const Mystring &left, const Mystring &right);
@@ -185,39 +193,41 @@ public:
 
     Mystring &append(Mystring &first, const Mystring &str, size_t subpos, size_t sublen);
 
-    Mystring &append(const char *s);
+    Mystring &append(Mystring &first, const char *s);
 
-    Mystring &append(const char *s, size_t n);
+    Mystring &append(Mystring &first, const char *s, size_t n);
 
-    Mystring &append(size_t n, char c);
+    Mystring &append(Mystring &first, size_t n, char c);
 
     template<class InputIterator>
     Mystring &append(InputIterator first, InputIterator last);
 
     void push_back(char c);
 
-    Mystring &assign(const Mystring &str);
+    void push_back(Mystring &s, char c);
 
-    Mystring &assign(const Mystring &str, size_t subpos, size_t sublen);
+    Mystring &assign(Mystring &first, const Mystring &str);
 
-    Mystring &assign(const char *s);
+    Mystring &assign(Mystring &first, const Mystring &str, size_t subpos, size_t sublen);
 
-    Mystring &assign(const char *s, size_t n);
+    Mystring &assign(Mystring &first, const char *s);
 
-    Mystring &assign(size_t n, char c);
+    Mystring &assign(Mystring &first, const char *s, size_t n);
+
+    Mystring &assign(Mystring &first, size_t n, char c);
 
     template<class InputIterator>
     Mystring &assign(InputIterator first, InputIterator last);
 
-    Mystring &insert(size_t pos, const Mystring &str);
+    Mystring &insert(size_t pos, const Mystring &str, Mystring &first);
 
-    Mystring &insert(size_t pos, const Mystring &str, size_t subpos, size_t sublen);
+    Mystring &insert(Mystring &first, size_t pos, const Mystring &str, size_t subpos, size_t sublen);
 
-    Mystring &insert(size_t pos, const char *s);
+    Mystring &insert(Mystring &first, size_t pos, const char *s);
 
-    Mystring &insert(size_t pos, const char *s, size_t n);
+    Mystring &insert(Mystring &first, size_t pos, const char *s, size_t n);
 
-    Mystring &insert(size_t pos, size_t n, char c);
+    Mystring &insert(Mystring &first, size_t pos, size_t n, char c);
 
     void insert(iterator p, size_t n, char c);
 
@@ -257,6 +267,8 @@ public:
 
     void pop_back();
 
+    void pop_back(Mystring &s);
+
 //    String operations:
     const char *c_str() const;
 
@@ -264,7 +276,7 @@ public:
 
     allocator_type get_allocator() const;
 
-    size_t copy(char *s, size_t len, size_t pos = 0) const;
+    size_t copy(Mystring &src, char *s, size_t len, size_t pos = 0);
 
     size_t find(const Mystring &str, size_t pos = 0) const;
 
