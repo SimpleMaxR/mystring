@@ -5,8 +5,6 @@
 #include <climits>
 #include "mystring.h"
 
-size_t strlen(const char *s);
-
 using namespace std;
 
 //默认构造函数 default constructor
@@ -384,14 +382,13 @@ char *Mystring::strpbrk(char *str1, const char *str2) {
 
 //实现strrchr
 char *Mystring::strrchr(const char *str, int value) {
+    //find the last occurrence of the character value in the string str
     int i = 0;
-    //遍历str中的字符
-    while (str[i] != '\0') {
-        //str中的字符与value相等，返回该字符的地址
-        if (str[i] == value) {
-            return (char *) str + i;
+    size_t len = strlen(str);
+    while (len-- >= 0) {
+        if (str[len] == value) {
+            return (char *) str + len;
         }
-        i++;
     }
     return NULL;
 }
@@ -607,12 +604,16 @@ long double Mystring::stold(const Mystring &str, size_t *idx) {
 long Mystring::strtol(const char *str, char **endptr, int base) {
     long int result = 0;        //存储转换结果
     bool isNegative = false;    //是否是负数
+    bool overflowed = false;    //是否溢出
     const char *pos = str;      //指向str中的当前字符
-    const char *start = pos;    //开始转换的位置
+    unsigned long maxValueWithoutLastDigit;
+    int lastDigit;
 
-    //检查base数值
+    //检查base数值和str有效性
     if ((base < 2 || base > 36) && base != 0) {
-        return -1;
+        throw "Invalid base";
+    } else if (str == nullptr) {
+        throw "Invalid string";
     }
 
     //跳过空白字符
@@ -621,14 +622,12 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
     }
 
     //判断正负
-    if (pos != NULL && *pos != '\0') {
-        if (*pos == '+') {
-            pos++;
-        }
-        if (*pos == '-') {
-            pos++;
-            isNegative = true;
-        }
+    if (*pos == '+') {
+        pos++;
+    }
+    if (*pos == '-') {
+        pos++;
+        isNegative = true;
     }
 
     //如base已知，则准备转换
@@ -643,7 +642,7 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
 
     //base不明确，判断base
     if (base == 0) {
-        base = 10;
+        base = 10; //默认10
         if (*pos == '0') {
             base = 8;
             pos++;
@@ -658,46 +657,138 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
         }
     }
 
-    while (*pos != '\0') {
+    maxValueWithoutLastDigit = isNegative ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
+    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
+    maxValueWithoutLastDigit /= (unsigned long) base;
+    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
+
+    //遍历字符串
+    for (;; pos++) {
         long long num = -1;
-        //转换‘0’~'9'之间的字符
+
         if ((int) *pos >= 48 && (int) *pos <= 57) {
-            num = (int) *pos - 48;
-        }
-        //转换‘a'~'f'之间的字符
-        if (isalpha(*pos)) {
-            num = (int) toupper(*pos) - 55;
-        }
+            num = (int) *pos - 48;          //转换‘0’~'9'之间的字符
+        } else if (isalpha(*pos)) {
+            num = (int) toupper(*pos) - 55; //转换‘a'~'f'之间的字符
+        } else
+            break;
+
         //处理转换后数字
         if (num < base && num != -1) {
-            if (isNegative) {
-                if (result >= ((LONG_MIN + num) / base)) {
-                    result = result * base - num;
-                } else {
-                    result = LONG_MIN;
-                }
-            } else {
-                if (result <= ((LONG_MAX - num) / base)) {
-                    result = result * base + num;
-                } else {
-                    result = LONG_MAX;
-                }
+            if (overflowed || result > maxValueWithoutLastDigit ||
+                (result == maxValueWithoutLastDigit && (int) *pos > lastDigit))
+                overflowed = true; //标记为溢出
+            else {
+                overflowed = false;    //标记为有效
+                result *= base;         //转换为base进制
+                result += (int) *pos;    //加上当前的数字
             }
-        } else if (base == 16 && num > base && (*(pos - 1) == 'x' || *(pos - 1) == 'X')) {
-            --pos;
-            break;
-        } else {
-            break;
         }
+    }
+    if (overflowed) {
+        result = isNegative ? LONG_MIN : LONG_MAX;
+        throw "overflow";
+    } else if (isNegative)
+        result = -result; //如果是负数，则取反
+    if (endptr != 0)
+        *endptr = (char *) (overflowed ? pos : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
+    return result; //返回转换后的数字, 大功告成！！！！！！
+}
+
+unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
+    long int result = 0;        //存储转换结果
+    bool isNegative = false;    //是否是负数
+    bool overflowed = false;    //是否溢出
+    const char *pos = str;      //指向str中的当前字符
+    unsigned long maxValueWithoutLastDigit;
+    int lastDigit;
+
+    //检查base数值和str有效性
+    if ((base < 2 || base > 36) && base != 0) {
+        throw "Invalid base";
+    } else if (str == nullptr) {
+        throw "Invalid string";
+    }
+
+    //跳过空白字符
+    while (isspace(*pos)) {
         pos++;
     }
-    if (!isdigit(*(pos - 1)) && !isalpha(*(pos - 1)))
-        pos = start;
 
-    if (endptr)
-        *endptr = (char *) pos;
-    return result;
+    //判断正负
+    if (*pos == '+') {
+        pos++;
+    }
+    if (*pos == '-') {
+        pos++;
+        isNegative = true;
+    }
+
+    //如base已知，则准备转换
+    if (base == 16 || base == 8) {
+        if (base == 16 && *pos == '0' && (*(pos + 1) == 'x' || *(pos + 1) == 'X')) {
+            pos += 2;
+        }
+        if (base == 8 && *pos == '0') {
+            pos++;
+        }
+    }
+
+    //base不明确，判断base
+    if (base == 0) {
+        base = 10; //默认10
+        if (*pos == '0') {
+            base = 8;
+            pos++;
+            if (*pos == 'x' || *pos == 'X') {
+                pos++;
+                base = 16;
+            }
+            if (*pos == 'b' || *pos == 'B') {
+                pos++;
+                base = 2;
+            }
+        }
+    }
+
+    maxValueWithoutLastDigit = isNegative ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
+    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
+    maxValueWithoutLastDigit /= (unsigned long) base;
+    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
+
+    //遍历字符串
+    for (;; pos++) {
+        long long num = -1;
+
+        if ((int) *pos >= 48 && (int) *pos <= 57) {
+            num = (int) *pos - 48;          //转换‘0’~'9'之间的字符
+        } else if (isalpha(*pos)) {
+            num = (int) toupper(*pos) - 55; //转换‘a'~'f'之间的字符
+        } else
+            break;
+
+        //处理转换后数字
+        if (num < base && num != -1) {
+            if (overflowed || result > maxValueWithoutLastDigit ||
+                (result == maxValueWithoutLastDigit && (int) *pos > lastDigit))
+                overflowed = true; //标记为溢出
+            else {
+                overflowed = false;    //标记为有效
+                result *= base;         //转换为base进制
+                result += (int) *pos;    //加上当前的数字
+            }
+        }
+    }
+    if (overflowed) {
+        result = isNegative ? LONG_MIN : LONG_MAX;
+        throw "overflow";
+    } else if (isNegative)
+        result = -result; //如果是负数，则取反
+    if (endptr != 0)
+        *endptr = (char *) (overflowed ? pos : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
+    return result; //返回转换后的数字, 大功告成！！！！！！
 }
+
 
 //实现strtoul
 //unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
@@ -904,6 +995,8 @@ bool Mystring::empty() const {
     //如果字符串长度为0，则返回true
     if (this->m_length == 0) {
         return true;
+    } else {
+        return false;
     }
 }
 
@@ -1061,6 +1154,7 @@ Mystring &Mystring::append(Mystring &first, size_t n, char c) {
     while (n--) {
         first.m_data[oldLength++] = c;
     }
+    return first;
 }
 
 //TODO 迭代器
@@ -1097,6 +1191,7 @@ Mystring &Mystring::assign(Mystring &first, const Mystring &str) {
     first.setNewLength(str.strlen()); //设置新的长度为str长度(容量由setNewLength维护)
     delete[] first.m_data; //释放原来的内存
     first.m_data = str.m_data;
+    return first;
 }
 
 Mystring &Mystring::assign(Mystring &first, const Mystring &str, size_t subpos, size_t sublen) {
@@ -1270,6 +1365,7 @@ Mystring &Mystring::insert(Mystring &first, size_t pos, size_t n, char c) {
             first.m_data[pos + i] = c; //put n copies of c to first
         }
     }
+    return first;
 }
 
 //void Mystring::insert(iterator p, size_t n, char c) {
@@ -1333,6 +1429,7 @@ Mystring &Mystring::replace(size_t pos, size_t len, const Mystring &str) {
         memcpy(m_data + pos, str.c_str(), str.strlen());
         setNewLength(strlen());
     }
+    return *this;
 }
 
 //Mystring &Mystring::replace(iterator i1, iterator i2, const Mystring &str) {
@@ -1475,7 +1572,7 @@ size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
 }
 
 //size_t Mystring::find(const Mystring &str, size_t pos) const {
-//    //find
+//
 //}
 
 //size_t Mystring::find(const char *s, size_t pos) const {
@@ -1589,8 +1686,42 @@ size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
 
 Mystring &operator+(const Mystring &left, const Mystring &right) {
     //concatenate two strings
+    Mystring tool;
+    Mystring *temp = new Mystring();
+    temp->setNewLength(left.strlen() + right.strlen());
+    tool.memcpy(temp->m_data, left.c_str(), left.strlen());
+    tool.memcpy(temp->m_data + left.strlen(), right.c_str(), right.strlen());
+    return *temp;
+}
 
+Mystring &operator+(const Mystring &lhs, char rhs) {
+    //concatenate a string and a char
+    Mystring tool;
+    Mystring *temp = new Mystring();
+    temp->setNewLength(lhs.strlen() + 1);
+    tool.memcpy(temp->m_data, lhs.c_str(), lhs.strlen());
+    temp->m_data[lhs.strlen()] = rhs;
+    return *temp;
+}
 
+Mystring &operator+(const Mystring &lhs, const char *rhs) {
+    //concatenate a string and a const char
+    Mystring tool;
+    Mystring *temp = new Mystring();
+    temp->setNewLength(lhs.strlen() + tool.strlen(rhs));
+    tool.memcpy(temp->m_data, lhs.c_str(), lhs.strlen());
+    tool.memcpy(temp->m_data + lhs.strlen(), rhs, tool.strlen(rhs));
+    return *temp;
+}
+
+Mystring &operator+(char lhs, const Mystring &rhs) {
+    //concatenate a char and a string
+    Mystring tool;
+    Mystring *temp = new Mystring();
+    temp->setNewLength(1 + rhs.strlen());
+    temp->m_data[0] = lhs;
+    tool.memcpy(temp->m_data + 1, rhs.c_str(), rhs.strlen());
+    return *temp;
 }
 
 

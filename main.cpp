@@ -28,14 +28,17 @@ void debugPass() {
     t.test_memchr();
     t.test_strchr();
     t.test_strcspn();
-
-
+    t.test_strpbrk();
+    t.test_strrchr();
+    t.test_strspn();
+    t.test_strchr();
+    t.test_strtok();
 }
 
 void debugMyString() {
     test t;
     Mystring s1 = "Hello";
-    t.test_append();
+    t.test_strtol();
 
 
 }

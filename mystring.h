@@ -17,25 +17,55 @@ class Mystring {
 
     friend Mystring &operator+(const Mystring &left, const Mystring &right);
 
-    friend Mystring operator+(const Mystring &lhs, char rhs);
+    friend Mystring &operator+(const Mystring &lhs, char rhs);
 
-    friend Mystring operator+(const Mystring &lhs, const char *rhs);
+    friend Mystring &operator+(const Mystring &lhs, const char *rhs);
 
-    friend Mystring operator+(char lhs, const Mystring &rhs);
+    friend Mystring &operator+(char lhs, const Mystring &rhs);
 
-    friend Mystring operator+(const char *lhs, const Mystring &rhs);
+    friend Mystring &operator+(const char *lhs, const Mystring &rhs);
 
     friend bool operator==(const Mystring &left, const Mystring &right);
 
+    friend bool operator==(const char *left, const Mystring &right);
+
+    friend bool operator==(const Mystring &left, const char *right);
+
     friend bool operator!=(const Mystring &left, const Mystring &right);
+
+    friend bool operator!=(const char *left, const Mystring &right);
+
+    friend bool operator!=(const Mystring &left, const char *right);
 
     friend bool operator>(const Mystring &left, const Mystring &right);
 
+    friend bool operator>(const char *left, const Mystring &right);
+
+    friend bool operator>(const Mystring &left, const char *right);
+
     friend bool operator<(const Mystring &left, const Mystring &right);
+
+    friend bool operator<(const char *left, const Mystring &right);
+
+    friend bool operator<(const Mystring &left, const char *right);
 
     friend bool operator<=(const Mystring &left, const Mystring &right);
 
+    friend bool operator<=(const char *left, const Mystring &right);
+
+    friend bool operator<=(const Mystring &left, const char *right);
+
+    friend bool operator>(const Mystring &left, const Mystring &right);
+
+    friend bool operator>(const char *left, const Mystring &right);
+
+    friend bool operator>(const Mystring &left, const char *right);
+
     friend bool operator>=(const Mystring &left, const Mystring &right);
+
+    friend bool operator>=(const char *left, const Mystring &right);
+
+    friend bool operator>=(const Mystring &left, const char *right);
 
 
 //1. <cstring>的24个功能  https://m.cplusplus.com/reference/cstring/
@@ -263,8 +293,6 @@ public:
     template<class InputIterator>
     Mystring &replace(iterator i1, iterator i2, InputIterator first, InputIterator last);
 
-    void swap(Mystring &str);
-
     void pop_back();
 
     void pop_back(Mystring &s);
@@ -330,6 +358,22 @@ public:
 
     int compare(const Mystring &str) const;
 
+    int compare(size_t pos, size_t len, const Mystring &str) const;
+
+    int compare(size_t pos, size_t len, const Mystring &str, size_t subpos, size_t sublen) const;
+
+    int compare(const char *s) const;
+
+    int compare(size_t pos, size_t len, const char *s) const;
+
+    int compare(size_t pos, size_t len, const char *s, size_t n) const;
+
+    void swap(Mystring &str);
+
+    std::istream &getline(std::istream &is, Mystring &str, char delim = '\n');
+
+    std::istream &getline(std::istream &is, Mystring &str);
+
 
     //    other
     void *memset(void *ptr, int value, size_t num);
@@ -359,7 +403,6 @@ private:
     void setNewLength(size_t newLength);
 
     void setNewLength(size_t newLength, Mystring s);
-
 };
 
 #endif //MYSTRING_MYSTRING_H

@@ -29,6 +29,8 @@ void test::test_constructor() {
 }
 
 void test::test_memcpy() {
+    cout << "test_memcpy" << endl;
+
     struct {
         char name[40];
         int age;
@@ -46,6 +48,7 @@ void test::test_memcpy() {
 
     printf("person_copy: %s, %d \n", person_copy.name, person_copy.age);
 
+    cout << "end test_memcpy" << endl;
 }
 
 //TODO 加号运算符未重载
@@ -57,6 +60,8 @@ void test::test_memmove() {
 }
 
 void test::test_stoi() {
+    cout << "test_stoi" << endl;
+
     Mystring a;
     const char *str_dec = "2001, A Space Odyssey";
     const char *str_hex = "40c3";
@@ -74,6 +79,8 @@ void test::test_stoi() {
     cout << str_hex << ": " << i_hex << '\n';
     cout << str_bin << ": " << i_bin << '\n';
     cout << str_auto << ": " << i_auto << '\n';
+
+    cout << "end test_stoi" << endl;
 }
 
 void test::test_stol() {
@@ -93,7 +100,7 @@ void test::test_stol() {
 
 void test::test_strtol() {
 
-    char szNumbers[] = "2001 60c0c0 -1101110100110100100000 0x6fffff";
+    char szNumbers[] = "2001 0x60c0c0 -1101110100110100100000 0x6fffff";
     char *pEnd;
     long int li1, li2, li3, li4;
     li1 = li2 = li3 = li4 = 0;
@@ -238,6 +245,72 @@ void test::test_append() {
     Mystring str2 = "world";
 //    cout << forTest.append(str, str2) << endl;
     cout << forTest.append(str, str2, 2, 2) << endl;
+}
+
+void test::test_strrchr() {
+    Mystring forTest;
+    const char str[] = "hello eason!";
+    const char ch = 'e';
+    char *ret;
+
+    ret = forTest.strrchr(str, ch);
+
+    cout << "test for strrchr" << endl;
+    cout << "words in " << str << "after 'e' is " << ret << endl;
+
+}
+
+void test::test_strspn() {
+    Mystring forTest;
+    int len;
+    const char str1[] = "ABCDEFG019874";
+    const char str2[] = "ABCD";
+
+    len = forTest.strspn(str1, str2);
+
+    cout << "first pair range's length is " << len << endl;
+}
+
+void test::test_strstr() {
+    Mystring forTest;
+    const char str[] = "hello world";
+    const char str2[] = "world";
+
+    char *ret = forTest.strstr(str, str2);
+
+    cout << "the substr is " << ret << endl;
+}
+
+void test::test_strtok() {
+    Mystring forTest;
+    char str[80] = "This-is-my-website-120.76.192.132";
+    const char s[2] = "-";
+    char *token;
+
+    /* 获取第一个子字符串 */
+    token = forTest.strtok(str, s);
+
+    /* 继续获取其他的子字符串 */
+    while (token != NULL) {
+        cout << token << endl;
+
+        token = forTest.strtok(NULL, s);
+    }
+
+}
+
+void test::test_operator() {
+    //TODO 待实际测试 operator =
+    Mystring str1, str2, str3;
+    str1 = "Test string: ";   // c-string
+    str2 = 'x';               // single character
+    str3 = str1 + str2;       // string
+
+    cout << str3 << endl;
+
+    //TODO 待完成定义 operator []
+
+    //TODO 待完成定义 operator +=
 }
 
 
