@@ -167,9 +167,10 @@ char *Mystring::strcpy(char *cpy, const char *src) {
 }
 
 //实现strncpy
-char *Mystring::strncpy(char *destination, const char *source, size_t num) {
-    int i = 0;
+char *Mystring::strncpy(char *destination, const char *source, size_t num) const {
     //拷贝源字符串中num个字符到目标字符串
+    int i = 0;
+
     while (source[i] != '\0' && i < num) {
         destination[i] = source[i];
         i++;
@@ -305,7 +306,7 @@ int Mystring::strncmp(const char *str1, const char *str2, size_t num) {
 
 //实现strxfrm
 size_t Mystring::strxfrm(char *destination, const char *source, size_t num) {
-//    根据程序当前的区域选项中的 LC_COLLATE 来转换字符串 src 的前 n 个字符，并把它们放置在字符串 dest 中
+    //根据程序当前的区域选项中的 LC_COLLATE 来转换字符串 src 的前 n 个字符，并把它们放置在字符串 dest 中
     //简单实现，直接拷贝source到destination
     int i = 0;
     while (source[i] != '\0' && i < num) {
@@ -318,7 +319,7 @@ size_t Mystring::strxfrm(char *destination, const char *source, size_t num) {
 
 
 //实现memchr
-void *Mystring::memchr(const void *ptr, int value, size_t num) {
+void *Mystring::memchr(const void *ptr, int value, size_t num) const {
 //    在参数 str 所指向的字符串的前 n 个字节中搜索第一次出现字符 c（一个无符号字符）的位置。
 
     char *p = (char *) ptr;
@@ -333,9 +334,8 @@ void *Mystring::memchr(const void *ptr, int value, size_t num) {
 }
 
 //实现strchr
-char *Mystring::strchr(const char *str, int value) {
+char *Mystring::strchr(const char *str, int value) const {
 //  在参数 str 所指向的字符串中搜索第一次出现字符 c（一个无符号字符）的位置。
-
     int i = 0;
     //遍历str中的字符
     while (str[i] != '\0') {
@@ -345,11 +345,11 @@ char *Mystring::strchr(const char *str, int value) {
         }
         i++;
     }
-    return NULL;
+    return nullptr;
 }
 
 //实现strcspn
-size_t Mystring::strcspn(const char *str1, const char *str2) {
+size_t Mystring::strcspn(const char *str1, const char *str2) const {
 //  返回 str1 中首次出现 str2 中的字符的位置，如果没有出现，则返回 str1 的长度。
 
     int i = 0;
@@ -365,7 +365,7 @@ size_t Mystring::strcspn(const char *str1, const char *str2) {
 }
 
 //实现strpbrk
-char *Mystring::strpbrk(char *str1, const char *str2) {
+char *Mystring::strpbrk(char *str1, const char *str2) const {
 //  检索字符串 str1 中第一个匹配字符串 str2 中字符的字符，不包含空结束字符
 
     int i = 0;
@@ -381,7 +381,7 @@ char *Mystring::strpbrk(char *str1, const char *str2) {
 }
 
 //实现strrchr
-char *Mystring::strrchr(const char *str, int value) {
+char *Mystring::strrchr(const char *str, int value) const {
     //find the last occurrence of the character value in the string str
     int i = 0;
     size_t len = strlen(str);
@@ -394,28 +394,26 @@ char *Mystring::strrchr(const char *str, int value) {
 }
 
 //实现strspn
-size_t Mystring::strspn(const char *str1, const char *str2) {
+size_t Mystring::strspn(const char *str1, const char *str2) const {
     //检索字符串 str1 中第一个不在字符串 str2 中出现的字符的下标。
     int i = 0;
     //遍历str1中的字符
-    while (str1[i] != '\0' && strchr(str2, str1[i]) != NULL) {
+    while (str1[i] != '\0' && strchr(str2, str1[i]) != nullptr) {
         i++;
     }
     return i;
 }
 
 //实现strstr TODO 实现strstr
-char *Mystring::strstr(const char *str1, const char *str2) {
-//    int i = 0;
-//    //遍历str1中的字符
-//    while (str1[i] != '\0') {
-//        //str2中的字符与str1中的字符相等，返回该字符的地址
-//        if (strncmp(str1 + i, str2, strlen(str2)) == 0) {
-//            return (char *) str1 + i;
-//        }
-//        i++;
-//    }
-//    return NULL;
+char *Mystring::strstr(const char *str1, const char *str2) const {
+    //检索字符串 str1 中第一个匹配字符串 str2 中字符的字符位置，不包含空结束字符
+    while (*str1 != '\0') {
+        if ((*str1 == *str2) && compare(str1, str2)) {
+            return const_cast<char *>(str1);
+        }
+        str1++;
+    }
+
     return NULL;
 }
 
@@ -692,7 +690,7 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
         result = -result; //如果是负数，则取反
     if (endptr != 0)
         *endptr = (char *) (overflowed ? pos : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
-    return result; //返回转换后的数字, 大功告成！！！！！！
+    return result; //返回转换后的数字, 大功告成
 }
 
 unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
@@ -1126,7 +1124,6 @@ Mystring &Mystring::append(Mystring &first, const Mystring &str, size_t subpos, 
     return first;
 }
 
-
 Mystring &Mystring::append(Mystring &first, const char *s) {
     //在string末尾添加s
     unsigned oldLength = first.strlen(); //保存原来的长度，用于比较
@@ -1526,6 +1523,13 @@ void Mystring::swap(Mystring &str) {
     m_data = temp;
 }
 
+void Mystring::swap(Mystring &str, Mystring &str2) {
+    //swap the contents of str with str2
+    char *temp = str.m_data;
+    str.m_data = str2.m_data;
+    str2.m_data = temp;
+}
+
 void Mystring::pop_back() {
     //remove the last character from first
     size_t len = strlen();
@@ -1542,7 +1546,7 @@ void Mystring::pop_back(Mystring &s) {
     }
 }
 
-const char *Mystring::c_str() const {
+char *const Mystring::c_str() const {
     //return a pointer to the null-terminated string
     return m_data;
 }
@@ -1571,116 +1575,380 @@ size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
     return len;
 }
 
-//size_t Mystring::find(const Mystring &str, size_t pos) const {
-//
-//}
+size_t Mystring::find(const Mystring &str, size_t pos) const {
+    //find the first occurrence of str started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strstr(m_data + pos, str.c_str());
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
 
-//size_t Mystring::find(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::rfind(const Mystring &str, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::rfind(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::rfind(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_of(const Mystring &str, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_of(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_of(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_of(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_of(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_of(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_not_of(const Mystring &str, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_not_of(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_not_of(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_first_not_of(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_not_of(const Mystring &str, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_not_of(const char *s, size_t pos) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_not_of(const char *s, size_t pos, size_t n) const {
-//    return 0;
-//}
-//
-//size_t Mystring::find_last_not_of(char c, size_t pos) const {
-//    return 0;
-//}
-//
-//Mystring Mystring::substr(size_t pos, size_t len) const {
-//    return Mystring();
-//}
-//
+size_t Mystring::find(const char *s, size_t pos) const {
+    //find the first occurrence of s started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strstr(m_data + pos, s);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find(const char *s, size_t pos, size_t n) const {
+    //find the first occurrence of s started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strstr(m_data + pos, s);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find(char c, size_t pos) const {
+    //find the first occurrence of c started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strchr(m_data + pos, c);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::rfind(const Mystring &str, size_t pos) const {
+    //find the last occurrence of str started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrstr(m_data + pos, str.c_str());
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::rfind(const char *s, size_t pos) const {
+    //find the last occurrence of s started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrstr(m_data + pos, s);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
+    //find the last occurrence of s started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrstr(m_data + pos, s);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::rfind(char c, size_t pos) const {
+    //find the last occurrence of c started from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrchr(m_data + pos, c);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_first_of(const Mystring &str, size_t pos) const {
+    //find the first occurrence of any character in str from position pos
+    //在字符串中搜索与其参数中指定的任何字符匹配的第一个字符。(从pos开始)
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strpbrk(m_data + pos, str.c_str());
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_first_of(const char *s, size_t pos) const {
+    //find the first occurrence of s from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strpbrk(m_data + pos, s);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
+    //find the first occurrence of s from position pos for n characters
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        while (n-- > 0) {
+            char *temp = strpbrk(m_data + pos, s);
+            if (temp == nullptr || temp - m_data > n) {
+                return npos;
+            } else {
+                return temp - m_data;
+            }
+        }
+    }
+}
+
+size_t Mystring::find_first_of(char c, size_t pos) const {
+    //find the first occurrence of c from position pos
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strchr(m_data + pos, c);
+        if (temp == NULL) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
+    //find the last occurrence of any character in str from position pos (search from the end)
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrpbrk(m_data + pos, str.c_str());
+        if (temp == nullptr) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_last_of(const char *s, size_t pos) const {
+    //find the last occurrence of s from position pos (search from the end)
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrpbrk(m_data + pos, s);
+        if (temp == nullptr) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_last_of(const char *s, size_t pos, size_t n) const {
+    //find the last occurrence of s from position pos for n characters (search from the end)
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        while (n-- > 0) {
+            char *temp = strrpbrk(m_data + pos, s);
+            if (temp == nullptr || temp - m_data > n) {
+                return npos;
+            } else {
+                return temp - m_data;
+            }
+        }
+    }
+}
+
+size_t Mystring::find_last_of(char c, size_t pos) const {
+    //find the last occurrence of c from position pos (search from the end)
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        char *temp = strrchr(m_data + pos, c);
+        if (temp == nullptr) {
+            return npos;
+        } else {
+            return temp - m_data;
+        }
+    }
+}
+
+size_t Mystring::find_first_not_of(const Mystring &str, size_t pos) const {
+    //Searches m_data for the first character that does not match any of the characters specified in str.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        size_t temp = strspn(m_data + pos, str.c_str());
+        if (temp == strlen(m_data + pos) + 1) {
+            return npos;
+        } else {
+            return temp;
+        }
+    }
+}
+
+size_t Mystring::find_first_not_of(const char *s, size_t pos) const {
+    //Searches m_data for the first character that does not match s.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        size_t temp = strspn(m_data + pos, s);
+        if (temp == strlen(m_data + pos) + 1) {
+            return npos;
+        } else {
+            return temp;
+        }
+    }
+}
+
+size_t Mystring::find_first_not_of(const char *s, size_t pos, size_t n) const {
+    //Searches m_data for the first character that does not match any of the characters specified in s for n characters.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        while (n-- > 0) {
+            size_t temp = strspn(m_data + pos, s);
+            if (temp == strlen(m_data + pos) + 1 || temp > n) {
+                return npos;
+            } else {
+                return temp;
+            }
+        }
+    }
+}
+
+size_t Mystring::find_first_not_of(char c, size_t pos) const {
+    //Searches m_data for the first character that does not match c.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        size_t temp = strcspn(m_data + pos, &c);
+        if (temp == strlen(m_data + pos) + 1) {
+            return npos;
+        } else {
+            return temp;
+        }
+    }
+}
+
+size_t Mystring::find_last_not_of(const Mystring &str, size_t pos) const {
+    //Searches m_data for the last character that does not match any of the characters in str.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        int i = strlen(m_data + pos); //get the length of the string to be searched
+        while (i-- >= 0) {
+            if (strchr(str.c_str(), m_data[i + pos]) == nullptr) //if m_data[i + pos] is not in str, return its index
+                return i + pos;
+        }
+        return npos;
+    }
+}
+
+size_t Mystring::find_last_not_of(const char *s, size_t pos) const {
+    //Searches m_data for the last character that does not match any of the characters in s.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        int i = strlen(m_data + pos); //get the length of the string to be searched
+
+        while (i-- >= 0) {
+            if (strchr(s, m_data[i + pos]) == nullptr)  //if m_data[i + pos] is not in s, return its index
+                return i + pos;
+        }
+        return npos; //if all characters in m_data[i + pos] are in s, return npos
+    }
+}
+
+size_t Mystring::find_last_not_of(const char *s, size_t pos, size_t n) const {
+    //Searches m_data for the last character that does not match any of the characters in s for n characters.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        int i = strlen(m_data + pos);   //get the length of the string to be searched
+
+        //search until the end of the string or n characters have been searched
+        while (i-- >= 0 && n-- > 0) {
+            if (strchr(s, m_data[i + pos]) == nullptr)  //if m_data[i + pos] is not in s, return its index
+                return i + pos;
+        }
+        return npos;
+    }
+}
+
+size_t Mystring::find_last_not_of(char c, size_t pos) const {
+    //Searches m_data for the last character that does not match c.
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        int i = strlen(m_data + pos);   //get the length of the string to be searched
+
+        //search until the end of the string
+        while (i-- >= 0) {
+            if (m_data[i + pos] != c)  //if m_data[i + pos] is not equal c, return its index
+                return i + pos;
+        }
+        return npos;
+    }
+}
+
+Mystring Mystring::substr(size_t pos, size_t len) const {
+    //Returns a substring of m_data of length len starting at position pos.
+    char *temp = new char[len + 1]; //create a new array of size len + 1 ( 1 for '\0')
+
+    if (pos > strlen()) {
+        throw "pos is out of range";    //make sure pos is not out of range
+    } else {
+        strncpy(temp, m_data + pos, len); //copy the substring to temp
+    }
+}
+
 //int Mystring::compare(const Mystring &str) const {
 //    return 0;
 //}
 
+int Mystring::compare(const char *str1, const char *str2) const {
+    while (*str1 && *str2) {
+        if (*str1 != *str2) {
+            return 0;
+        }
 
-
-
-
-
-
+        str1++;
+        str2++;
+    }
+    return (*str2 == '\0');
+}
 
 //运算符重载
 
@@ -1724,27 +1992,64 @@ Mystring &operator+(char lhs, const Mystring &rhs) {
     return *temp;
 }
 
+Mystring &operator+(const char *lhs, const Mystring &rhs) {
+    //concatenate a const char and a string
+    Mystring tool;
+    Mystring *temp = new Mystring();
+    temp->setNewLength(tool.strlen(lhs) + rhs.strlen());
+    tool.memcpy(temp->m_data, lhs, tool.strlen(lhs));
+    tool.memcpy(temp->m_data + tool.strlen(lhs), rhs.c_str(), rhs.strlen());
+    return *temp;
+}
 
+bool operator==(const Mystring &left, const Mystring &right) {
+    //compare two strings
+    if (left.strlen() != right.strlen()) {
+        return false;
+    } else {
+        return left.compare(right.c_str());
+    }
+}
+//bool operator==(const char *left, const Mystring &right);
+//bool operator==(const Mystring &left, const char *right);
+//bool operator!=(const Mystring &left, const Mystring &right);
+//bool operator!=(const char *left, const Mystring &right);
+//bool operator!=(const Mystring &left, const char *right);
+//bool operator>(const Mystring &left, const Mystring &right);
+//bool operator>(const char *left, const Mystring &right);
+//bool operator>(const Mystring &left, const char *right);
+//bool operator<(const Mystring &left, const Mystring &right);
+//bool operator<(const char *left, const Mystring &right);
+//bool operator<(const Mystring &left, const char *right);
+//bool operator<=(const Mystring &left, const Mystring &right);
+//bool operator<=(const char *left, const Mystring &right);
+//bool operator<=(const Mystring &left, const char *right);
+//bool operator>(const Mystring &left, const Mystring &right);
+//bool operator>(const char *left, const Mystring &right);
+//bool operator>(const Mystring &left, const char *right);
+//bool operator>=(const Mystring &left, const Mystring &right);
+//bool operator>=(const char *left, const Mystring &right);
+//bool operator>=(const Mystring &left, const char *right);
 
+std::istream &Mystring::getline(istream &is, Mystring &str, char delim) {
+//    从 is 中提取字符并将它们存储到 str 中，直到找到分隔符 delim（或换行符，'\n'）
+    str.clear();
+    char c;
+    while (is.get(c) && (c != delim || c != '\n')) {
+        str.push_back(c);
+    }
+    return is;
+}
 
-
-
-
-
-
-
-
-
-//其他
-
-
-//重载！=运算符
-
-//int operator!=(const Mystring *str1, const Mystring *str2) {
-//    return strcmp(str1, str2) != 0;
-//}
-
-
+std::istream &Mystring::getline(istream &is, Mystring &str) {
+//    从 is 中提取字符并将它们存储到 str 中，直到找到换行符，'\n'，
+    str.clear();
+    char c;
+    while (is.get(c) && c != '\n') {
+        str.push_back(c);
+    }
+    return is;
+}
 
 //实现strlen
 size_t Mystring::strlen() const {
@@ -1770,9 +2075,6 @@ size_t Mystring::strlen(const char *str) const {
     }
     return i;
 }
-
-
-
 
 void Mystring::setNewCapacity(size_t newCapacity) {
     m_capacity = 15; //init capacity value is 15
@@ -1803,13 +2105,44 @@ void Mystring::setNewLength(size_t newLength, Mystring s) {
     s.m_length = newLength;
 }
 
+char *Mystring::strrstr(char *string, const char *str) const {
+    //find the last occurrence of str in string
+    char *p = string;
+    char *q = string;
+    while (*p != '\0') {
+        q = p;
+        while (*q == *str) {
+            ++q;
+            ++str;
+        }
+        if (*str == '\0') {
+            return q;
+        }
+        ++p;
+        str = q;
+    }
+    return nullptr;
+}
+
+char *Mystring::strrpbrk(char *str1, const char *const str2) const {
+    //find the last occurrence of any character in str2 in str1
+    //right search version for strpbrk
+    size_t len = strlen(str1); //get the length of str1
+
+    while (len-- > 0) {
+        //loop through str1
+        if (strchr(str2, str1[len]) != nullptr) {
+            return str1 + len; //if str1[len] is in str2, return str1 + len
+        }
+    }
+    return nullptr; //if no character in str1 is in str2, return nullptr
+}
+
 //析构函数
 Mystring::~Mystring() {
     delete[] m_data;
 
 }
-
-
 
 
 

@@ -15,4 +15,8 @@
 [Github项目地址](https://github.com/SimpleMaxR/mystring/tree/master)  
 [Gitee项目地址](https://gitee.com/SimpleMaxR/mystring)
 
+**关于项目注释**  
+前面的注释是中文，后面的注释以英文为主（为了练习英文）
+
+
 

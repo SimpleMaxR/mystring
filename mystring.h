@@ -77,7 +77,7 @@ public:
 
     char *strcpy(char *copy, const char *src);
 
-    char *strncpy(char *destination, const char *source, size_t num);
+    char *strncpy(char *destination, const char *source, size_t num) const;
 
 //    Concatenation:
 
@@ -99,19 +99,19 @@ public:
 
 //    Searching:
 
-    void *memchr(const void *ptr, int value, size_t num);
+    void *memchr(const void *ptr, int value, size_t num) const;
 
-    char *strchr(const char *str, int character);
+    char *strchr(const char *str, int character) const;
 
-    size_t strcspn(const char *str1, const char *str2);
+    size_t strcspn(const char *str1, const char *str2) const;
 
-    char *strpbrk(char *str1, const char *str2);
+    char *strpbrk(char *str1, const char *str2) const;
 
-    char *strrchr(const char *str, int value);
+    char *strrchr(const char *str, int value) const;
 
-    size_t strspn(const char *str1, const char *str2);
+    size_t strspn(const char *str1, const char *str2) const;
 
-    char *strstr(const char *str1, const char *str2);
+    char *strstr(const char *str1, const char *str2) const;
 
     char *strtok(char *str, const char *delimiters);
 
@@ -298,7 +298,7 @@ public:
     void pop_back(Mystring &s);
 
 //    String operations:
-    const char *c_str() const;
+    char *const c_str() const;
 
     const char *data() const;
 
@@ -368,7 +368,11 @@ public:
 
     int compare(size_t pos, size_t len, const char *s, size_t n) const;
 
+    int compare(const char *str1, const char *str2) const;
+
     void swap(Mystring &str);
+
+    void swap(Mystring &str, Mystring &str2);
 
     std::istream &getline(std::istream &is, Mystring &str, char delim = '\n');
 
@@ -386,6 +390,9 @@ public:
 
     char *strerror(int errnum);
 
+    char *strrstr(char *string, const char *str) const;
+
+    char *strrpbrk(char *string, const char *const str) const;
 
 public:
     ~Mystring();
@@ -403,6 +410,8 @@ private:
     void setNewLength(size_t newLength);
 
     void setNewLength(size_t newLength, Mystring s);
+
+
 };
 
 #endif //MYSTRING_MYSTRING_H
