@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 //默认构造函数 default constructor
 Mystring::Mystring() {
     m_capacity = 15; //默认容量
@@ -496,7 +497,7 @@ void *Mystring::memset(void *ptr, int value, size_t num) {
 
 //实现strerror
 char *Mystring::strerror(int errnum) {
-    char *errmsg;
+    char *errmsg = nullptr;
     switch (errnum) {
         case 0:
             strcpy(errmsg, "Success");
@@ -573,17 +574,61 @@ long Mystring::stol(const char *str, size_t *idx, int base) {
 
 //TODO 实现stoul(利用strtoul)
 unsigned long Mystring::stoul(const Mystring &str, size_t *idx, int base) {
-    return 0;
+    //convert str to unsigned long (use strtoul)
+    char *endptr;
+    unsigned long result;
+    //校验转换结果为unsigned long型可表示范围
+    unsigned long long temp = strtoul(str.c_str(), &endptr,
+                                      base);    //调用strtoul进行转换,用更大的unsigned long long型变量存储转换结果，节省一次转换
+    if (temp > ULONG_MAX) {
+        return ULONG_MAX;   //转换结果超过unsigned long型可表示范围，返回unsigned long型最大值
+    } else {
+        result = temp;   //转换结果在unsigned long型可表示范围内，直接返回转换结果
+    }
+
+    if (endptr == str.c_str()) {
+        //转换失败或者没有转换，返回0
+        return 0;
+    }
+
+    if (idx != NULL) {
+        //idx不为空，记录转换后的字符串的下标
+        *idx = endptr - str.c_str();
+    }
 }
 
 //TODO 实现stoll(利用strtoll)
 long long Mystring::stoll(const Mystring &str, size_t *idx, int base) {
-    return 0;
+    //convert str to long long (use strtoll)
+    char *endptr;
+    long long result;
+    //校验转换结果为long long型可表示范围
+    long long temp = strtoll(str.c_str(), &endptr, base);    //调用strtoll进行转换,用更大的long long
+    if (temp > LLONG_MAX) {
+        return LLONG_MAX;   //转换结果超过long long型可表示范围，返回long long型最大值
+    } else
+        result = temp;   //转换结果在long long型可表示范围内，直接返回转换结果
+
+    if (endptr == str.c_str()) {
+        //转换失败或者没有转换，返回0
+        return 0;
+    }
+
+    if (idx != NULL) {
+        //idx不为空，记录转换后的字符串的下标
+        *idx = endptr - str.c_str();
+    }
 }
 
 //TODO 四个实现
 unsigned long long Mystring::stoull(const Mystring &str, size_t *idx, int base) {
-    return 0;
+    //convert str to unsigned long long (use strtoull)
+    char *endptr;
+    unsigned long long result;
+    //check if the result is in the range of unsigned long long
+    unsigned long long temp = strtoull(str.c_str(), &endptr, base);    //convert str by using strtoull
+
+
 }
 
 float Mystring::stof(const Mystring &str, size_t *idx) {
@@ -690,30 +735,30 @@ long Mystring::strtol(const char *str, char **endptr, int base) {
         result = -result; //如果是负数，则取反
     if (endptr != 0)
         *endptr = (char *) (overflowed ? pos : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
-    return result; //返回转换后的数字, 大功告成
+    return result; //返回转换后的数字
 }
 
 unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
-    long int result = 0;        //存储转换结果
-    bool isNegative = false;    //是否是负数
-    bool overflowed = false;    //是否溢出
-    const char *pos = str;      //指向str中的当前字符
+    long int result = 0;        //convert result
+    bool isNegative = false;    //negative flag
+    bool overflowed = false;    //overflow flag
+    const char *pos = str;      //position now
     unsigned long maxValueWithoutLastDigit;
     int lastDigit;
 
-    //检查base数值和str有效性
+    //check the base and str validity
     if ((base < 2 || base > 36) && base != 0) {
         throw "Invalid base";
     } else if (str == nullptr) {
         throw "Invalid string";
     }
 
-    //跳过空白字符
+    //skip the space
     while (isspace(*pos)) {
         pos++;
     }
 
-    //判断正负
+    //check the sign
     if (*pos == '+') {
         pos++;
     }
@@ -722,7 +767,7 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
         isNegative = true;
     }
 
-    //如base已知，则准备转换
+    //if base is known, prepare to convert
     if (base == 16 || base == 8) {
         if (base == 16 && *pos == '0' && (*(pos + 1) == 'x' || *(pos + 1) == 'X')) {
             pos += 2;
@@ -732,7 +777,7 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
         }
     }
 
-    //base不明确，判断base
+    //base is unknown, detect the base
     if (base == 0) {
         base = 10; //默认10
         if (*pos == '0') {
@@ -749,12 +794,11 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
         }
     }
 
-    maxValueWithoutLastDigit = isNegative ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
-    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
-    maxValueWithoutLastDigit /= (unsigned long) base;
+    maxValueWithoutLastDigit = (unsigned long) ULONG_MAX / (unsigned long) base; //最大值的前n-1位数
+    lastDigit = (unsigned long) ULONG_MAX % (unsigned long) base; //最大值的最后一位数
     //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
 
-    //遍历字符串
+    //go through the string
     for (;; pos++) {
         long long num = -1;
 
@@ -769,98 +813,86 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
         if (num < base && num != -1) {
             if (overflowed || result > maxValueWithoutLastDigit ||
                 (result == maxValueWithoutLastDigit && (int) *pos > lastDigit))
-                overflowed = true; //标记为溢出
+                overflowed = true; //tag as overflow
             else {
-                overflowed = false;    //标记为有效
-                result *= base;         //转换为base进制
-                result += (int) *pos;    //加上当前的数字
+                overflowed = false;    //tag as valid
+                result *= base;         //convert to base
+                result += (int) *pos;    //add current digit
             }
         }
     }
     if (overflowed) {
-        result = isNegative ? LONG_MIN : LONG_MAX;
+        result = ULONG_MAX;
         throw "overflow";
     } else if (isNegative)
-        result = -result; //如果是负数，则取反
+        result = -result; //if negative, take the negative
     if (endptr != 0)
-        *endptr = (char *) (overflowed ? pos : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
-    return result; //返回转换后的数字, 大功告成！！！！！！
+        *endptr = (char *) (overflowed ? pos
+                                       : str); //if valid, point to the last valid character, otherwise point to the beginning
+    return result; //return the converted number
 }
 
+double Mystring::strtod(const char *nptr, char **endptr) {
+    bool isNegative = false;    //negative flag
+    double num;
 
-//实现strtoul
-//unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
-//#define ULONG_MAX ((unsigned long) -1)
-//    const char *s = str;
-//    unsigned long acc;
-//    int c;
-//    unsigned long maxValueWithoutLastDigit;
-//    int neg = 0, any, lastDigit;
-//
-////跳过空白，c定位到第一个非空白字符，s指向c的下一个字符
-//    do {
-//        c = *s++;
-//    } while (isspace(c));
-//
-//
-////    定义正负
-//    if (c == '-') {
-//        neg = 1;
-//        c = *s++;
-//    } else if (c == '+')
-//        c = *s++;
-//
-//    //利用0x前缀判断是16进制
-//    if ((base == 0 || base == 16) &&
-//        c == '0' && (*s == 'x' || *s == 'X')) {
-//        c = s[1]; //跳过0x
-//        s += 2; //跳到c的下一个字符
-//        base = 16;
-//    }
-//
-////    利用0前缀判断是8进制
-//    if (base == 0)
-//        base = c == '0' ? 8 : 10;
-//
-//    maxValueWithoutLastDigit = neg ? -(unsigned long) LONG_MIN : LONG_MAX; //最大值的前n-1位数
-//    lastDigit = maxValueWithoutLastDigit % (unsigned long) base; //最大值的最后一位数
-//    maxValueWithoutLastDigit /= (unsigned long) base;
-//    //透过这两个变量，我们可以知道，如果输入的数字超过了最大值，那么它的前x位将吻合”最大值的前n-1位“，而且它的最后一位数就会大于“最大值的最后一位数”。
-//
-//    for (acc = 0, any = 0;; c = *s++) {
-//        if (isdigit(c))
-//            c -= '0'; // 如果是数字，则减去'0' ？？？？？
-//        else if (isalpha(c))
-//            if (isupper(c)) {
-//                c -= 'A' - 10;
-//            } else {
-//                c -= 'a' - 10;
-//            } // 如果是字母，则减去字母的值
-//        else
-//            break; // 如果不是数字或字母，则跳出循环
-//
-//        if (c >= base)
-//            break;
-//
-//        if (any < 0 || acc > maxValueWithoutLastDigit || (acc == maxValueWithoutLastDigit && c > lastDigit))
-//            any = -1; //标记为溢出
-//        else {
-//            any = 1;    //标记为有效
-//            acc *= base;    //转换为base进制
-//            acc += c;    //加上当前的数字
-//        }
-//    }
-//
-//    if (any < 0) {
-//        acc = neg ? LONG_MIN : LONG_MAX;
-//        throw "overflow";
-//    } else if (neg)
-//        acc = -acc; //如果是负数，则取反
-//    if (endptr != 0)
-//        *endptr = (char *) (any ? s - 1 : str); //如果有效，则指向最后一个有效字符，否则指向起始位置
-//
-//    return (acc); //返回转换后的数字, 大功告成！！！！！！
-//}
+    const char *s = nptr;   //position now
+    const char *end;
+    char *endbuf;
+    int saved_errno;
+
+    //skip the space
+    while (isspace(*s)) {
+        ++s;
+    }
+
+    //check the sign
+    if (*s == '-') {
+        isNegative = true;
+        ++s;
+    } else if (*s == '+') {
+        ++s;
+    }
+
+    //check the number
+    if (isdigit(s[*s == '.' ? 1 : 0])) {
+        if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
+            if (!isxdigit(s[2 + (s[2] == '.')]))
+                end = s + 1;
+            else if (end <= s + 2) {
+                // num = parse_number (s + 2, 16, 2, 4, 'p', &endbuf);
+                end = endbuf;
+            } else {
+                const char *p = s + 2;
+                while (p < end && tolower(*p) != 'p')
+                    p++;
+                if (p < end && !isdigit(p[1 + (p[1] == '-' || p[1] == '+')]))
+                    end = p;
+            }
+        } else {
+            const char *e = s + 1;
+            while (e < end && tolower(*e) != 'e')
+                e++;
+            if (e < end && !isdigit(e[1 + (e[1] == '-' || e[1] == '+')])) {
+                char *dup = strdup(s);
+                errno = saved_errno;
+                if (!dup) {
+//                    num = parse_number (s, 10, 10, 1, 'e', &endbuf);
+                } else {
+                    dup[e - s] = '\0';
+                    num = underlying_strtod(dup, &endbuf);
+                    free(dup);
+                }
+                end = e;
+            }
+        }
+        s = end;
+    }
+
+//     Check for infinities and NaNs.
+
+}
+
 
 //实现 =运算符重载
 Mystring &Mystring::operator=(const Mystring &str) {
@@ -1730,6 +1762,7 @@ size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
             }
         }
     }
+    return npos;
 }
 
 size_t Mystring::find_first_of(char c, size_t pos) const {
@@ -1788,6 +1821,7 @@ size_t Mystring::find_last_of(const char *s, size_t pos, size_t n) const {
             }
         }
     }
+    return npos;
 }
 
 size_t Mystring::find_last_of(char c, size_t pos) const {
@@ -1846,6 +1880,7 @@ size_t Mystring::find_first_not_of(const char *s, size_t pos, size_t n) const {
             }
         }
     }
+    return npos;
 }
 
 size_t Mystring::find_first_not_of(char c, size_t pos) const {
@@ -1860,6 +1895,7 @@ size_t Mystring::find_first_not_of(char c, size_t pos) const {
             return temp;
         }
     }
+    return npos;
 }
 
 size_t Mystring::find_last_not_of(const Mystring &str, size_t pos) const {
@@ -1931,19 +1967,143 @@ Mystring Mystring::substr(size_t pos, size_t len) const {
         throw "pos is out of range";    //make sure pos is not out of range
     } else {
         strncpy(temp, m_data + pos, len); //copy the substring to temp
+        temp[len] = '\0'; //add '\0' to the end of temp
+        return Mystring(temp); //return a Mystring object with temp as its m_data
     }
 }
 
-//int Mystring::compare(const Mystring &str) const {
-//    return 0;
-//}
+int Mystring::compare(const Mystring &str) const {
+    //compare m_data to the value of str.
+    char *s1 = m_data;  //value to compare from m_data
+    char *s2 = str.c_str(); //value to compare from str
+    while (*s1 != '\0' && *s2 != '\0') {
+        if (*s2 < *s1) {
+            return -1;  //value of the not match character is lower in the compared string
+        } else if (*s2 > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s2++;
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s2 != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s2 == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
+}
+
+int Mystring::compare(size_t pos, size_t len, const Mystring &str) const {
+    //compare m_data to the value of str, starting at position pos for len characters
+    char *s1 = m_data + pos;  //value to compare from m_data
+    char *s2 = str.c_str(); //value to compare from str
+    while (*s1 != '\0' && *s2 != '\0' && len-- > 0) {
+        if (*s2 < *s1) {
+            return -1;  //value of the not match character is lower in the compared string
+        } else if (*s2 > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s2++;
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s2 != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s2 == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
+}
+
+int Mystring::compare(size_t pos, size_t len, const Mystring &str, size_t subpos, size_t sublen) const {
+    //compare m_data to the value of str, starting at position pos for len characters in m_data and starting at subpos for sublen characters in str
+}
+
+int Mystring::compare(const char *s) const {
+    //compare m_data to the value of an array pointed by s (s expects a null-terminated string)
+    char *s1 = m_data;  //value to compare from m_data
+    while (*s1 != '\0' && *s != '\0') {
+        if (*s < *s1) {
+            return -1;  //value of the not match character is lower in the compared string
+        } else if (*s > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s++;
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
+}
+
+int Mystring::compare(size_t pos, size_t len, const char *s) const {
+    //compare m_data to the value of an array pointed by s (s expects a null-terminated string), m_data starting at position pos for len characters
+    char *s1 = m_data + pos;  //value to compare from m_data
+    while (*s1 != '\0' && *s != '\0' && len-- > 0) {
+        if (*s < *s1) {
+            return -1;  //value of the not match character is lower in the compared string
+        } else if (*s > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s++;
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
+}
+
+int Mystring::compare(size_t pos, size_t len, const char *s, size_t n) const {
+    //compare m_data to the value of an array pointed by s (s expects a null-terminated string),
+    //m_data starting at position pos for len characters and n characters in s
+
+    char *s1 = m_data + pos;  //value to compare from m_data
+    bool flag = true; //flag to check if the compared need to be stopped
+
+    while (flag) {
+        if (*s < *s1) {
+            return -1; //value of the not match character is lower in the compared string
+        } else if (*s > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s++;
+        flag = (*s1 != '\0' && *s != '\0') && (len-- > 0 && n-- > 0);
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
+
+}
 
 int Mystring::compare(const char *str1, const char *str2) const {
     while (*str1 && *str2) {
         if (*str1 != *str2) {
             return 0;
         }
-
         str1++;
         str2++;
     }
@@ -2010,26 +2170,123 @@ bool operator==(const Mystring &left, const Mystring &right) {
         return left.compare(right.c_str());
     }
 }
-//bool operator==(const char *left, const Mystring &right);
-//bool operator==(const Mystring &left, const char *right);
-//bool operator!=(const Mystring &left, const Mystring &right);
-//bool operator!=(const char *left, const Mystring &right);
-//bool operator!=(const Mystring &left, const char *right);
-//bool operator>(const Mystring &left, const Mystring &right);
-//bool operator>(const char *left, const Mystring &right);
-//bool operator>(const Mystring &left, const char *right);
-//bool operator<(const Mystring &left, const Mystring &right);
-//bool operator<(const char *left, const Mystring &right);
-//bool operator<(const Mystring &left, const char *right);
-//bool operator<=(const Mystring &left, const Mystring &right);
-//bool operator<=(const char *left, const Mystring &right);
-//bool operator<=(const Mystring &left, const char *right);
-//bool operator>(const Mystring &left, const Mystring &right);
-//bool operator>(const char *left, const Mystring &right);
-//bool operator>(const Mystring &left, const char *right);
-//bool operator>=(const Mystring &left, const Mystring &right);
-//bool operator>=(const char *left, const Mystring &right);
-//bool operator>=(const Mystring &left, const char *right);
+
+bool operator==(const char *left, const Mystring &right) {
+    //compare a const char and a string
+    Mystring tool;
+    return tool.compare(left, right.c_str());
+}
+
+bool operator==(const Mystring &left, const char *right) {
+    //compare a string and a const char
+    Mystring tool;
+    return tool.compare(left.c_str(), right);
+}
+
+bool operator!=(const Mystring &left, const Mystring &right) {
+    //compare two strings
+    if (left.strlen() != right.strlen()) {
+        return true;
+    } else {
+        return left.compare(right.c_str());
+    }
+}
+
+bool operator!=(const char *left, const Mystring &right) {
+    //compare a const char and a string
+    Mystring tool;
+    return tool.compare(left, right.c_str());
+}
+
+bool operator!=(const Mystring &left, const char *right) {
+    //compare a string and a const char
+    Mystring tool;
+    return tool.compare(left.c_str(), right);
+}
+
+bool operator<(const Mystring &left, const Mystring &right) {
+    //if string left is less than string right, return true
+    if (left.strlen() < right.strlen()) {
+        return true;
+    } else {
+        return left.compare(right) < 0;
+    }
+}
+
+bool operator<(const char *left, const Mystring &right) {
+    //if const char left is less than string right, return true
+    Mystring tool;
+    return tool.compare(left, right.c_str()) < 0;
+}
+
+bool operator<(const Mystring &left, const char *right) {
+    //if string left is less than const char right, return true
+    Mystring tool;
+    return tool.compare(left.c_str(), right) < 0; //TODO check compare function
+}
+
+bool operator<=(const Mystring &left, const Mystring &right) {
+    //if string left is less than or equal to string right, return true
+    if (left.strlen() <= right.strlen()) {
+        return true;
+    } else {
+        return left.compare(right) <= 0;
+    }
+}
+
+bool operator<=(const char *left, const Mystring &right) {
+    //if const char left is less than or equal to string right, return true
+    Mystring tool;
+    return tool.compare(left, right.c_str()) <= 0; //TODO check compare function
+}
+
+bool operator<=(const Mystring &left, const char *right) {
+    //if string left is less than or equal to const char right, return true
+    Mystring tool;
+    return tool.compare(left.c_str(), right) <= 0; //TODO check compare function
+}
+
+bool operator>(const Mystring &left, const Mystring &right) {
+    //if string left is greater than string right, return true
+    if (left.strlen() > right.strlen()) {
+        return true;
+    } else {
+        return left.compare(right) > 0;
+    }
+}
+
+bool operator>(const char *left, const Mystring &right) {
+    //if const char left is greater than string right, return true
+    Mystring tool;
+    return tool.compare(left, right.c_str()) > 0; //TODO check compare function
+}
+
+bool operator>(const Mystring &left, const char *right) {
+    //if string left is greater than const char right, return true
+    Mystring tool;
+    return tool.compare(left.c_str(), right) > 0; //TODO check compare function
+}
+
+bool operator>=(const Mystring &left, const Mystring &right) {
+    //if string left is greater than or equal to string right, return true
+    if (left.strlen() >= right.strlen()) {
+        return true;
+    } else {
+        return left.compare(right) >= 0;
+    }
+}
+
+bool operator>=(const char *left, const Mystring &right) {
+    //if const char left is greater than or equal to string right, return true
+    Mystring tool;
+    return tool.compare(left, right.c_str()) >= 0; //TODO check compare function
+}
+
+bool operator>=(const Mystring &left, const char *right) {
+    //if string left is greater than or equal to const char right, return true
+    Mystring tool;
+    return tool.compare(left.c_str(), right) >= 0; //TODO check compare function
+}
 
 std::istream &Mystring::getline(istream &is, Mystring &str, char delim) {
 //    从 is 中提取字符并将它们存储到 str 中，直到找到分隔符 delim（或换行符，'\n'）
@@ -2143,7 +2400,6 @@ Mystring::~Mystring() {
     delete[] m_data;
 
 }
-
 
 
 

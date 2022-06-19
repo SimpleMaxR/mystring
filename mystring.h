@@ -135,8 +135,6 @@ public:
 
     long strtol(const char *str, char **endptr, int base);
 
-    unsigned long int strtoul(const char *str, char **endptr, int base);
-
 // 3、Construct string object。（共6个）。功能描述与使用见：http://www.cplusplus.com/reference/string/string/string/ (
 
     Mystring();
@@ -259,39 +257,39 @@ public:
 
     Mystring &insert(Mystring &first, size_t pos, size_t n, char c);
 
-    void insert(iterator p, size_t n, char c);
-
-    iterator insert(iterator p, char c);
+//    void insert(iterator p, size_t n, char c);
+//
+//    iterator insert(iterator p, char c);
 
     template<class InputIterator>
     Mystring &insert(iterator p, InputIterator first, InputIterator last);
 
     Mystring &erase(size_t pos = 0, size_t len = npos);
 
-    iterator erase(iterator p);
-
-    iterator erase(iterator first, iterator last);
+//    iterator erase(iterator p);
+//
+//    iterator erase(iterator first, iterator last);
 
     Mystring &replace(size_t pos, size_t len, const Mystring &str);
 
-    Mystring &replace(iterator i1, iterator i2, const Mystring &str);
+//    Mystring &replace(iterator i1, iterator i2, const Mystring &str);
 
     Mystring &replace(size_t pos, size_t len, const Mystring *str, size_t subpos, size_t sublen);
 
     Mystring &replace(size_t pos, size_t len, const char *s);
 
-    Mystring &replace(iterator i1, iterator i2, const char *s);
+//    Mystring &replace(iterator i1, iterator i2, const char *s);
 
     Mystring &replace(size_t pos, size_t len, const char *s, size_t n);
 
-    Mystring &replace(iterator i1, iterator i2, const char *s, size_t n);
+//    Mystring &replace(iterator i1, iterator i2, const char *s, size_t n);
 
     Mystring &replace(size_t pos, size_t len, size_t n, char c);
 
-    Mystring &replace(iterator i1, iterator i2, size_t n, char c);
-
-    template<class InputIterator>
-    Mystring &replace(iterator i1, iterator i2, InputIterator first, InputIterator last);
+//    Mystring &replace(iterator i1, iterator i2, size_t n, char c);
+//
+//    template<class InputIterator>
+//    Mystring &replace(iterator i1, iterator i2, InputIterator first, InputIterator last);
 
     void pop_back();
 
