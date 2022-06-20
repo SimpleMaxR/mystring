@@ -3,4 +3,4 @@ project(mystring)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(mystring main.cpp basic.cpp basic.h mystring.cpp mystring.h funcionForTest.cpp test.cpp test.h)
+add_executable(mystring main.cpp mystring.cpp mystring.h test.cpp test.h)
