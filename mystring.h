@@ -3,8 +3,7 @@
 //
 #include<iostream>
 #include <iterator>
-#include "iterator.h"
-#include "allocator_type.h"
+
 
 #ifndef MYSTRING_MYSTRING_H
 #define MYSTRING_MYSTRING_H
