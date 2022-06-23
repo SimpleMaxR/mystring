@@ -33,15 +33,39 @@ void debugPass() {
     t.test_strspn();
     t.test_strchr();
     t.test_strtok();
+    t.test_size();
+    t.test_resize();
+    t.test_shrink_to_fit();
+    t.test_at();
+    t.test_back();
+    t.test_front();
+    t.test_append();
+    t.test_erase();
+    t.test_replace();
+    t.test_popback();
+    t.test_c_str();
+    t.test_data();
+    t.test_copy();
+    t.test_find();
+    t.test_find_first_of();
+
 }
 
 void debugMyString() {
     test t;
     Mystring s1 = "Hello";
-    t.test_strtol();
+//    t.test_reserve();
+//    t.test_clear();
+//    t.test_empty();
+//      t.test_insert();
+//    t.test_rfind();
+    t.test_find_first_not_of();
+//    t.test_find_last_of();
+
 
 
 }
+
 
 int main() {
     debugMyString();

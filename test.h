@@ -1,6 +1,7 @@
 //
 // Created by Hugo-PC on 5/6/2022.
 //
+#include "mystring.h"
 
 #ifndef MYSTRING_TEST_H
 #define MYSTRING_TEST_H
@@ -102,8 +103,6 @@ public:
     void test_c_str();
 
     void test_data();
-
-    void test_get_allocator();
 
     void test_copy();
 

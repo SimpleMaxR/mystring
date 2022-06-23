@@ -550,10 +550,11 @@ int Mystring::stoi(const char *str, size_t *idx, int base) {
     return result;
 }
 
-//实现stol(利用strtol)
+//实现stol(利用自己写的strtol)
 long Mystring::stol(const char *str, size_t *idx, int base) {
     char *endptr;
     long result;
+
     //校验转换结果为long型可表示范围
     long long temp = strtol(str, &endptr, base);    //调用strtol进行转换,用更大的long long型变量存储转换结果，节省一次转换
     if (temp > LONG_MAX) {
@@ -620,27 +621,50 @@ long long Mystring::stoll(const Mystring &str, size_t *idx, int base) {
     }
 }
 
-//TODO 四个实现
 unsigned long long Mystring::stoull(const Mystring &str, size_t *idx, int base) {
-    //convert str to unsigned long long (use strtoull)
-    char *endptr;
-    unsigned long long result;
-    //check if the result is in the range of unsigned long long
-    unsigned long long temp = strtoull(str.c_str(), &endptr, base);    //convert str by using strtoull
+    //convert str to unsigned long long (use strtoull in <cstdlib>)
 
-
+    return 0;
 }
 
+//实现stof(利用库函数 strtod)
 float Mystring::stof(const Mystring &str, size_t *idx) {
-    return 0;
+    //convert str to float (use strtod in <cstdlib>)
+
+    char **p = (char **) idx;     //give the address of idx to p
+    float i = strtod(str.m_data, p);    // call strtod to convert str to float
+    if (idx == nullptr)
+        return i;   //if idx is nullptr, forgive it and return the result of strtod
+    else {
+        *idx = *p - str.m_data; //if idx is not nullptr, return the index of the charater p is pointing to
+        return i;
+    }
 }
 
 double Mystring::stod(const Mystring &str, size_t *idx) {
-    return 0;
+    //simular to stof
+
+    char **p = (char **) idx;
+    double i = strtod(str.m_data, p);
+    if (idx == nullptr)
+        return i;
+    else {
+        *idx = *p - str.m_data;
+        return i;
+    }
 }
 
 long double Mystring::stold(const Mystring &str, size_t *idx) {
-    return 0;
+    //simular to stof
+
+    char **p = (char **) idx;
+    long double i = strtod(str.m_data, p);
+    if (idx == nullptr)
+        return i;
+    else {
+        *idx = *p - str.m_data;
+        return i;
+    }
 }
 
 //实现strtol
@@ -832,68 +856,6 @@ unsigned long int Mystring::strtoul(const char *str, char **endptr, int base) {
     return result; //return the converted number
 }
 
-double Mystring::strtod(const char *nptr, char **endptr) {
-    bool isNegative = false;    //negative flag
-    double num;
-
-    const char *s = nptr;   //position now
-    const char *end;
-    char *endbuf;
-    int saved_errno;
-
-    //skip the space
-    while (isspace(*s)) {
-        ++s;
-    }
-
-    //check the sign
-    if (*s == '-') {
-        isNegative = true;
-        ++s;
-    } else if (*s == '+') {
-        ++s;
-    }
-
-    //check the number
-    if (isdigit(s[*s == '.' ? 1 : 0])) {
-        if (*s == '0' && (s[1] == 'x' || s[1] == 'X')) {
-            if (!isxdigit(s[2 + (s[2] == '.')]))
-                end = s + 1;
-            else if (end <= s + 2) {
-                // num = parse_number (s + 2, 16, 2, 4, 'p', &endbuf);
-                end = endbuf;
-            } else {
-                const char *p = s + 2;
-                while (p < end && tolower(*p) != 'p')
-                    p++;
-                if (p < end && !isdigit(p[1 + (p[1] == '-' || p[1] == '+')]))
-                    end = p;
-            }
-        } else {
-            const char *e = s + 1;
-            while (e < end && tolower(*e) != 'e')
-                e++;
-            if (e < end && !isdigit(e[1 + (e[1] == '-' || e[1] == '+')])) {
-                char *dup = strdup(s);
-                errno = saved_errno;
-                if (!dup) {
-//                    num = parse_number (s, 10, 10, 1, 'e', &endbuf);
-                } else {
-                    dup[e - s] = '\0';
-                    num = underlying_strtod(dup, &endbuf);
-                    free(dup);
-                }
-                end = e;
-            }
-        }
-        s = end;
-    }
-
-//     Check for infinities and NaNs.
-
-}
-
-
 //实现 =运算符重载
 Mystring &Mystring::operator=(const Mystring &str) {
     // override operator =
@@ -966,8 +928,8 @@ size_t Mystring::max_size() const {
     return t;//返回字符串最大容量 （size_t 类型的最大值）
 }
 
-//实现resize (使用’\0’作为默认参数，省去一次重载）
-void Mystring::resize(size_t n, char c = '\0') {
+//实现resize
+void Mystring::resize(size_t n, char c) {
     //如果n小于字符串长度，则截断字符串
     if (n < m_length) {
         m_data[n] = '\0';
@@ -992,6 +954,31 @@ void Mystring::resize(size_t n, char c = '\0') {
     }
 }
 
+void Mystring::resize(size_t n) {
+    //如果n小于字符串长度，则截断字符串
+    if (n < m_length) {
+        m_data[n] = '\0';
+        m_length = n;
+    }
+        //如果n大于字符串长度，则扩展字符串
+    else if (n > m_length) {
+        //如果字符串容量不足，则扩展字符串容量
+        if (n > m_capacity) {
+            char *temp = new char[n + 1];
+            strcpy(temp, m_data);
+            delete[] m_data;
+            m_data = temp;
+            m_capacity = n;
+        }
+        //如果字符串容量足够，则在字符串末尾添加字符'\0'
+        for (size_t i = m_length; i < n; i++) {
+            m_data[i] = '\0';
+        }
+        m_data[n] = '\0';
+        m_length = n;
+    }
+}
+
 //实现capacity()函数
 size_t Mystring::capacity() const {
     return this->m_capacity;
@@ -1005,7 +992,7 @@ void Mystring::reserve(Mystring s, size_t n) {
 //    If n is less than the current capacity, the function does nothing.
     if (n > m_capacity) {
         char *temp = new char[n + 1];
-        setNewCapacity(n, temp);
+        setNewCapacity(n, s);
         strcpy(temp, m_data);
         delete[] m_data;
         m_data = temp;
@@ -1314,10 +1301,9 @@ Mystring &Mystring::insert(size_t pos, const Mystring &str, Mystring &first) {
     if (pos > first.strlen()) {
         throw "pos is out of range";
     } else {
-        size_t n = str.strlen(); //get the length of str
-        first.setNewLength(
-                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + n, first.m_data + pos,
+        first.setNewLength(first.strlen() +
+                           str.strlen()); //set new length to first with i,(capacity is maintained by setNewLength)
+        memmove(first.m_data + pos + str.strlen(), first.m_data + pos,
                 strlen(first.m_data) - pos + 1); //move the rest of first to the right
         memcpy(first.m_data + pos, str.c_str(), str.size());
     }
@@ -1465,22 +1451,24 @@ Mystring &Mystring::replace(size_t pos, size_t len, const Mystring &str) {
 //    return <#initializer#>;
 //}
 //
-Mystring &Mystring::replace(size_t pos, size_t len, const Mystring *str, size_t subpos, size_t sublen) {
+Mystring &Mystring::replace(size_t pos, size_t len, const Mystring str, size_t subpos, size_t sublen) {
     //replace len characters from first in position pos with str
     //make sure pos is not out of range
     if (pos > strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return *this;
     } else {
         if (len > strlen() - pos) {
             len = strlen() - pos;
         }
         if (subpos > strlen()) {
-            throw "subpos is out of range";
+            cout << "subpos is out of range" << endl;
+            return *this;
         }
         if (sublen > strlen() || sublen == npos) {
             sublen = strlen() - subpos;
         }
-        memcpy(m_data + pos, str->c_str() + subpos, sublen);
+        memcpy(m_data + pos, str.c_str() + subpos, sublen);
         setNewLength(strlen());
     }
     return *this;
@@ -1490,7 +1478,8 @@ Mystring &Mystring::replace(size_t pos, size_t len, const char *s) {
     //replace len characters from first in position pos with s
     //make sure pos is not out of range
     if (pos > strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return *this;
     } else {
         if (len > strlen() - pos) {
             len = strlen() - pos;
@@ -1509,7 +1498,8 @@ Mystring &Mystring::replace(size_t pos, size_t len, const char *s, size_t n) {
     //replace len characters from first in position pos with s
     //make sure pos is not out of range
     if (pos > strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return *this;
     } else {
         if (len > strlen() - pos) {
             len = strlen() - pos;
@@ -1528,7 +1518,8 @@ Mystring &Mystring::replace(size_t pos, size_t len, size_t n, char c) {
     //replace len characters from first in position pos with n copies of c
     //make sure pos is not out of range
     if (pos > strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return *this;
     } else {
         if (len > strlen() - pos) {
             len = strlen() - pos;
@@ -1538,15 +1529,6 @@ Mystring &Mystring::replace(size_t pos, size_t len, size_t n, char c) {
     }
     return *this;
 }
-
-//Mystring &Mystring::replace(iterator i1, iterator i2, size_t n, char c) {
-//    return <#initializer#>;
-//}
-//
-//template<class InputIterator>
-//Mystring &Mystring::replace(iterator i1, iterator i2, InputIterator first, InputIterator last) {
-//    return <#initializer#>;
-//}
 
 void Mystring::swap(Mystring &str) {
     //swap the contents of str with *this
@@ -1568,6 +1550,7 @@ void Mystring::pop_back() {
     if (len > 0) {
         setNewLength(len - 1);
     }
+    m_data[len - 1] = '\0';
 }
 
 void Mystring::pop_back(Mystring &s) {
@@ -1586,11 +1569,6 @@ char *const Mystring::c_str() const {
 const char *Mystring::data() const {
     //return a pointer to the null-terminated string
     return m_data;
-}
-
-allocator_type Mystring::get_allocator() const {
-    //return the allocator object
-    return allocator_type();
 }
 
 size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
@@ -1666,7 +1644,7 @@ size_t Mystring::find(char c, size_t pos) const {
 size_t Mystring::rfind(const Mystring &str, size_t pos) const {
     //find the last occurrence of str started from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strrstr(m_data + pos, str.c_str());
         if (temp == NULL) {
@@ -1680,7 +1658,7 @@ size_t Mystring::rfind(const Mystring &str, size_t pos) const {
 size_t Mystring::rfind(const char *s, size_t pos) const {
     //find the last occurrence of s started from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strrstr(m_data + pos, s);
         if (temp == NULL) {
@@ -1694,7 +1672,7 @@ size_t Mystring::rfind(const char *s, size_t pos) const {
 size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
     //find the last occurrence of s started from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strrstr(m_data + pos, s);
         if (temp == NULL) {
@@ -1708,7 +1686,7 @@ size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
 size_t Mystring::rfind(char c, size_t pos) const {
     //find the last occurrence of c started from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strrchr(m_data + pos, c);
         if (temp == NULL) {
@@ -1723,35 +1701,43 @@ size_t Mystring::find_first_of(const Mystring &str, size_t pos) const {
     //find the first occurrence of any character in str from position pos
     //在字符串中搜索与其参数中指定的任何字符匹配的第一个字符。(从pos开始)
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
-        char *temp = strpbrk(m_data + pos, str.c_str());
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
+        int a;
+        for (int i = pos; i < m_length; i++) {
+            a = 0;
+            for (int j = 0; j < str.m_length; j++) {
+                if (m_data[i] == str.m_data[j])
+                    return i;
+            }
         }
+        return npos;
     }
 }
 
 size_t Mystring::find_first_of(const char *s, size_t pos) const {
     //find the first occurrence of s from position pos
+    int i, a;
+    int b = -1;
+
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
-    } else {
-        char *temp = strpbrk(m_data + pos, s);
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
-        }
+        pos = strlen();
     }
+
+    while (*(m_data + pos) != '\0') {
+        for (size_t temp = 0; *(s + temp) != '\0'; temp++)
+            if (*(m_data + pos) == *(s + temp)) {
+                return pos;
+            }
+        pos++;
+    }
+    return npos;
 }
 
 size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
     //find the first occurrence of s from position pos for n characters
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         while (n-- > 0) {
             char *temp = strpbrk(m_data + pos, s);
@@ -1768,7 +1754,7 @@ size_t Mystring::find_first_of(const char *s, size_t pos, size_t n) const {
 size_t Mystring::find_first_of(char c, size_t pos) const {
     //find the first occurrence of c from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strchr(m_data + pos, c);
         if (temp == NULL) {
@@ -1781,8 +1767,8 @@ size_t Mystring::find_first_of(char c, size_t pos) const {
 
 size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
     //find the last occurrence of any character in str from position pos (search from the end)
-    if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+    if (pos > strlen() || pos == 0) {
+        pos = strlen();
     } else {
         char *temp = strrpbrk(m_data + pos, str.c_str());
         if (temp == nullptr) {
@@ -1796,7 +1782,7 @@ size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
 size_t Mystring::find_last_of(const char *s, size_t pos) const {
     //find the last occurrence of s from position pos (search from the end)
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
         char *temp = strrpbrk(m_data + pos, s);
         if (temp == nullptr) {
@@ -2022,6 +2008,26 @@ int Mystring::compare(size_t pos, size_t len, const Mystring &str) const {
 
 int Mystring::compare(size_t pos, size_t len, const Mystring &str, size_t subpos, size_t sublen) const {
     //compare m_data to the value of str, starting at position pos for len characters in m_data and starting at subpos for sublen characters in str
+    char *s1 = m_data + pos;  //value to compare from m_data
+    char *s2 = str.c_str() + subpos; //value to compare from str
+    while (*s1 != '\0' && *s2 != '\0' && len-- > 0) {
+        if (*s2 < *s1) {
+            return -1;  //value of the not match character is lower in the compared string
+        } else if (*s2 > *s1) {
+            return 1;   //value of the not match character is higher in the compared string
+        }
+        s1++;
+        s2++;
+    }
+
+    //if all compared characters match
+    if (*s1 == '\0' && *s2 != '\0') {
+        return -1;  //if m_data is shorter than str, return -1
+    } else if (*s1 != '\0' && *s2 == '\0') {
+        return 1;   //if str is shorter than m_data, return 1
+    } else {
+        return 0;   //if both strings are the same length, return 0
+    }
 }
 
 int Mystring::compare(const char *s) const {
@@ -2341,10 +2347,12 @@ void Mystring::setNewCapacity(size_t newCapacity) {
 }
 
 void Mystring::setNewCapacity(size_t n, Mystring s) {
+    char *temp = new char{};
     s.m_capacity = 15; //init capacity value is 15
     while (n > s.m_capacity) {
         s.m_capacity *= 2; //capacity should be a multiple of 15
     }
+
 }
 
 void Mystring::setNewLength(size_t newLength) {

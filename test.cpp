@@ -243,8 +243,17 @@ void test::test_append() {
     Mystring forTest;
     Mystring str = "hello";
     Mystring str2 = "world";
-//    cout << forTest.append(str, str2) << endl;
-    cout << forTest.append(str, str2, 2, 2) << endl;
+    Mystring str3 = "!";
+
+    cout << "str1: " << str << endl;
+    cout << "str2: " << str2 << endl;
+    cout << "str3: " << str3 << endl;
+    cout << '\n';
+
+    forTest.append(str, str2);
+    forTest.append(str, str3);
+
+    cout << "str1 after add str2 & str3 to it's end: " << str << endl;
 }
 
 void test::test_strrchr() {
@@ -311,6 +320,298 @@ void test::test_operator() {
     //TODO 待完成定义 operator []
 
     //TODO 待完成定义 operator +=
+}
+
+//TODO change name
+void test::test_size() {
+    Mystring str("Test string");
+    cout << "The size of str is " << str.size() << " bytes.\n";
+    cout << "The length of str is " << str.length() << '\n';
+    cout << "The MaxSize of str is " << str.max_size() << '\n';
+    cout << "The capacity of str is " << str.capacity() << '\n';
+}
+
+void test::test_resize() {
+    Mystring str("I like to code in C");
+    cout << str << '\n';
+
+    unsigned sz = str.size();
+
+    str.resize(sz + 2, '+');
+    cout << str << '\n';
+
+    str.resize(14, '\0');
+    cout << str << '\n';
+}
+
+//TODO bug
+void test::test_reserve() {
+    Mystring str = ("Test");
+    cout << "capasity of str before reserve is " << str.capacity() << '\0';
+
+    str.reserve(str, 28);
+    cout << "capasity of str after reserve(28) is " << str.capacity() << '\0';
+    cout << str;
+}
+
+void test::test_clear() {
+    char c;
+    Mystring str;
+    std::cout << "Please type some lines of text. Enter a dot (.) to finish:\n";
+    do {
+        c = cin.get();
+        str += c;
+        if (c == '\n') {
+            cout << str;
+            str.clear();
+        }
+    } while (c != '.');
+}
+
+void test::test_empty() {
+    Mystring content;
+    Mystring line;
+    std::cout << "Please introduce a text. Enter an empty line to finish:\n";
+    do {
+//        getline(std::cin,line);
+        content += line + '\n';
+    } while (!line.empty());
+    std::cout << "The text you introduced was:\n" << content;
+}
+
+void test::test_shrink_to_fit() {
+    Mystring str(100, 'x');
+    std::cout << "1. capacity of str: " << str.capacity() << '\n';
+
+    str.resize(10);
+    std::cout << "2. capacity of str use resize(10): " << str.capacity() << '\n';
+
+    str.shrink_to_fit();
+    std::cout << "3. capacity of str use shrink_to_fit: " << str.capacity() << '\n';
+}
+
+void test::test_at() {
+    Mystring str("Hello World");
+    for (unsigned i = 0; i < str.length(); ++i) {
+        cout << "char at " << i << " is " << str.at(i) << endl;
+    }
+}
+
+void test::test_back() {
+    Mystring str("hello world.");
+
+    cout << "Original string: " << str << endl;
+    cout << "The last char is: " << str.back() << endl;
+
+    str.back() = '!';
+
+    cout << "New string after change the last char to !: " << str << endl;
+}
+
+void test::test_front() {
+    Mystring str("test string");
+
+    cout << "Original string: " << str << endl;
+    cout << "The first char is: " << str.front() << endl;
+
+    str.front() = 'T';
+
+    cout << "New string after change the first char to T: " << str << endl;
+}
+
+void test::test_push_back() {
+    Mystring str("hello world.");
+
+    cout << "Original string: " << str << endl;
+    str.push_back('!');
+    cout << "New string after push_back '!': " << str << endl;
+}
+
+void test::test_assign() {
+    Mystring str("hello world.");
+
+    cout << "Original string: " << str << endl;
+    str.assign(str, "test string");
+    cout << "New string after assign 'test string': " << str << endl;
+}
+
+void test::test_insert() {
+    Mystring str = "to be question";
+    Mystring str2 = "the ";
+    Mystring str3 = "or not to be";
+
+    //follow the example in the https://m.cplusplus.com/reference/string/string/insert/
+    str.insert(6, str2, str);                 // to be (the )question
+    cout << "str.insert(6,str2,str): " << str << endl;
+    str.insert(str, 6, str3, 3, 4);             // to be (not )the question
+    cout << "str.insert(str,6,str3,3,4): " << str << endl;
+    str.insert(str, 10, "that is cool", 8);    // to be not (that is )the question
+    cout << "str.insert(str,10,\"that is cool\",8): " << str << endl;
+    str.insert(str, 10, "to be ");            // to be not (to be )that is the question
+    cout << "str.insert(str,10,\"to be \"): " << str << endl;
+    str.insert(str, 15, 1, ':');               // to be not to be(:) that is the question
+    cout << "str.insert(str,15,1,':'): " << str << endl;
+
+    std::cout << str << '\n';
+}
+
+void test::test_erase() {
+
+    Mystring str("This is an example sentence.");
+    std::cout << str << '\n';
+    // "This is an example sentence."
+    str.erase(10, 8);                        //            ^^^^^^^^
+    std::cout << str << '\n';
+    // "This is an sentence."
+}
+
+void test::test_replace() {
+    Mystring base = "this is a test string.";
+    Mystring str2 = "n example";
+    Mystring str3 = "sample phrase";
+    Mystring str4 = "useful.";
+
+    // replace signatures used in the same order as described above:
+
+    // Using positions:                 0123456789*123456789*12345
+    Mystring str = base;           // "this is a test string."
+    cout << "original str: " << str << endl;
+    cout << "base: " << base << endl;
+    cout << "str2: " << str2 << endl;
+    cout << "str3: " << str3 << endl;
+    cout << "str4: " << str4 << endl;
+    cout << '\n';
+
+    str.replace(9, 5, str2);          // "this is an example string." (1)
+    cout << "call str.replace(9,5,str2): " << str << endl;
+
+    str.replace(10, 6, str3, 7, 6);     // "this is an example phrase." (2)
+    cout << "call str.replace(10,6,str3,7,6): " << str << endl;
+
+    str.replace(8, 10, "just a");     // "this is just a phrase."     (3)
+    cout << "call str.replace(8,10,\"just a\"): " << str << endl;
+
+    str.replace(8, 6, "a shorty", 7);  // "this is a short phrase."    (4)
+    cout << "call str.replace(8,6,\"a shorty\",7): " << str << endl;
+
+    str.replace(5, 1, 3, '!');        // "this is a short phrase!!!"  (5)
+    cout << "call str.replace(22,1,3,'!'): " << str << endl;
+}
+
+void test::test_popback() {
+    Mystring str("hello world!");
+    cout << "Original string: " << str << endl;
+
+    str.pop_back();
+    cout << "string after call pop_back()" << str << '\n';
+}
+
+void test::test_c_str() {
+    Mystring str("hello world!");
+    cout << "Original string: " << str << endl;
+
+    cout << "str.c_str() = " << str.c_str() << '\n';
+}
+
+void test::test_data() {
+    Mystring str("hello world!");
+    cout << "Original string: " << str << endl;
+
+    cout << "str.data() = " << str.data() << '\n';
+}
+
+void test::test_copy() {
+    char *buffer;
+    Mystring str("Test string...");
+    size_t length = str.copy(str, buffer, 6, 5);
+    buffer[length] = '\0';
+    std::cout << "buffer contains: " << buffer << '\n';
+}
+
+void test::test_find() {
+    Mystring str("There are two needles in this haystack with needles.");
+    Mystring str2("needle");
+    cout << "original string is: " << str << '\n';
+    cout << '\n';
+
+    // different member versions of find in the same order as above:
+    std::size_t found = str.find(str2);
+    if (found != std::string::npos)
+        std::cout << "first 'needle' found at: " << found << '\n';
+
+    found = str.find("needles are small", found + 1, 6);
+    if (found != std::string::npos)
+        std::cout << "second 'needle' found at: " << found << '\n';
+
+    found = str.find("haystack");
+    if (found != std::string::npos)
+        std::cout << "'haystack' also found at: " << found << '\n';
+
+    found = str.find('.');
+    if (found != std::string::npos)
+        std::cout << "Period found at: " << found << '\n';
+
+    // let's replace the first needle:
+    str.replace(str.find(str2), str2.length(), "preposition");
+    std::cout << str << '\n';
+
+}
+
+void test::test_rfind() {
+    Mystring str("The sixth sick sheik's sixth sheep's sick.");
+    Mystring key("sixth");
+
+    size_t found = str.rfind(key);
+    if (found != std::string::npos)
+        str.replace(found, key.length(), "seventh,");
+    cout << "str after call str.replace (found,key.length(),\"seventh,\");" << '\n';
+    cout << str << '\n';
+}
+
+void test::test_find_first_of() {
+    Mystring str("Please, replace the vowels in this sentence by asterisks.");
+    size_t found = str.find_first_of("aeiou", 0);
+    while (found != std::string::npos) {
+        str[found] = '*';
+        found = str.find_first_of("aeiou", found + 1);
+    }
+
+    std::cout << str << '\n';
+
+}
+
+void test::test_find_last_of() {
+
+}
+
+void test::test_find_first_not_of() {
+
+    Mystring str("look for non-alphabetic characters...");
+
+    size_t found = str.find_first_not_of("abcdefghijklmnopqrstuvwxyz ");
+
+    if (found != std::string::npos)
+        std::cout << "first non-alphabetic character found at: " << found << '\n';
+    {
+        cout << "The first non-alphabetic character is " << str[found];
+        cout << " at position " << found << '\n';
+    }
+}
+
+void test::test_substr() {
+
+}
+
+void test::test_compare() {
+
+}
+
+void test::test_swap() {
+
+}
+
+void test::test_getline() {
+
 }
 
 
