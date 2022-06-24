@@ -15,4 +15,5 @@
 前面一部分是中文，后面的注释以英文为主。这是因为写的过程中发现英文阅读和描述问题的能力不足，所以决定使用英文注释，锻炼一下自己的英文能力。
 
 所用时间(ToT)
-：[![wakatime](https://wakatime.com/badge/user/ac7ca955-6809-460d-9746-996f4dc259f3/project/5daee463-f681-4248-a96d-0a41659b4dd3.svg)](https://wakatime.com/badge/user/ac7ca955-6809-460d-9746-996f4dc259f3/project/5daee463-f681-4248-a96d-0a41659b4dd3)
+：[![wakatime](https://wakatime.com/badge/user/ac7ca955-6809-460d-9746-996f4dc259f3/project/5daee463-f681-4248-a96d-0a41659b4dd3.svg)](https://wakatime.com/badge/user/ac7ca955-6809-460d-9746-996f4dc259f3/project/5daee463-f681-4248-a96d-0a41659b4dd3)  
+老板行行好，没有功劳也有苦劳

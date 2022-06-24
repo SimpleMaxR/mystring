@@ -190,6 +190,8 @@ public:
 
     void reserve(Mystring s, size_t n = 0);
 
+    void reserve(size_t n = 0);
+
     void clear();
 
     bool empty() const;
@@ -312,6 +314,7 @@ public:
 
     size_t find_first_of(char c, size_t pos = 0) const;
 
+
     size_t find_last_of(const Mystring &str, size_t pos = npos) const;
 
     size_t find_last_of(const char *s, size_t pos = npos) const;
@@ -319,6 +322,7 @@ public:
     size_t find_last_of(const char *s, size_t pos, size_t n) const;
 
     size_t find_last_of(char c, size_t pos = npos) const;
+
 
     size_t find_first_not_of(const Mystring &str, size_t pos = 0) const;
 
@@ -386,7 +390,6 @@ private:
     size_t m_capacity;//    字符串容量
 
     inline void setNewCapacity(size_t newCapacity);
-
     void setNewCapacity(size_t newCapacity, Mystring s);
 
     void setNewLength(size_t newLength);

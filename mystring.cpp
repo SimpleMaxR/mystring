@@ -539,11 +539,11 @@ int Mystring::stoi(const char *str, size_t *idx, int base) {
     int result;
     long temp = strtol(str, &endptr, base);
     result = (temp > INT_MAX ? INT_MAX : temp); //检查是否超出范围,超出范围则返回INT_MAX
-    if (endptr == str) {
-        //转换失败或者没有转换，返回0
-        return -1;
-    }
-    if (idx != NULL) {
+//    if (endptr == str) {
+//        //转换失败或者没有转换，返回0
+//        return -1;
+//    }
+    if (idx != nullptr) {
         //idx不为空，记录转换后的字符串的下标
         *idx = endptr - str;
     }
@@ -573,20 +573,14 @@ long Mystring::stol(const char *str, size_t *idx, int base) {
     return result;
 }
 
-//TODO 实现stoul(利用strtoul)
+//实现stoul(利用strtoul)
 unsigned long Mystring::stoul(const Mystring &str, size_t *idx, int base) {
     //convert str to unsigned long (use strtoul)
     char *endptr;
     unsigned long result;
     //校验转换结果为unsigned long型可表示范围
-    unsigned long long temp = strtoul(str.c_str(), &endptr,
-                                      base);    //调用strtoul进行转换,用更大的unsigned long long型变量存储转换结果，节省一次转换
-    if (temp > ULONG_MAX) {
-        return ULONG_MAX;   //转换结果超过unsigned long型可表示范围，返回unsigned long型最大值
-    } else {
-        result = temp;   //转换结果在unsigned long型可表示范围内，直接返回转换结果
-    }
-
+    unsigned long temp = strtoul(str.c_str(), &endptr,
+                                 base);    //调用strtoul进行转换
     if (endptr == str.c_str()) {
         //转换失败或者没有转换，返回0
         return 0;
@@ -598,36 +592,34 @@ unsigned long Mystring::stoul(const Mystring &str, size_t *idx, int base) {
     }
 }
 
-//TODO 实现stoll(利用strtoll)
+//实现stoll(利用strtoll)
 long long Mystring::stoll(const Mystring &str, size_t *idx, int base) {
     //convert str to long long (use strtoll)
     char *endptr;
-    long long result;
     //校验转换结果为long long型可表示范围
-    long long temp = strtoll(str.c_str(), &endptr, base);    //调用strtoll进行转换,用更大的long long
-    if (temp > LLONG_MAX) {
-        return LLONG_MAX;   //转换结果超过long long型可表示范围，返回long long型最大值
-    } else
-        result = temp;   //转换结果在long long型可表示范围内，直接返回转换结果
+    long long result = strtoll(str.c_str(), &endptr, base);    //调用strtoll进行转换,用更大的long long
 
-    if (endptr == str.c_str()) {
-        //转换失败或者没有转换，返回0
-        return 0;
-    }
-
-    if (idx != NULL) {
+    if (idx != nullptr) {
         //idx不为空，记录转换后的字符串的下标
         *idx = endptr - str.c_str();
     }
+    return result;
 }
 
 unsigned long long Mystring::stoull(const Mystring &str, size_t *idx, int base) {
     //convert str to unsigned long long (use strtoull in <cstdlib>)
+    char *endptr;
+    //校验转换结果为unsigned long long型可表示范围
+    unsigned long long result = strtoull(str.c_str(), &endptr, base);    //调用strtoull进行转换,用更大的unsigned long long
 
-    return 0;
+    if (idx != nullptr) {
+        //idx不为空，记录转换后的字符串的下标
+        *idx = endptr - str.c_str();
+    }
+    return result;
 }
 
-//实现stof(利用库函数 strtod)
+//实现stof(调用库函数 strtod)
 float Mystring::stof(const Mystring &str, size_t *idx) {
     //convert str to float (use strtod in <cstdlib>)
 
@@ -643,7 +635,6 @@ float Mystring::stof(const Mystring &str, size_t *idx) {
 
 double Mystring::stod(const Mystring &str, size_t *idx) {
     //simular to stof
-
     char **p = (char **) idx;
     double i = strtod(str.m_data, p);
     if (idx == nullptr)
@@ -656,7 +647,6 @@ double Mystring::stod(const Mystring &str, size_t *idx) {
 
 long double Mystring::stold(const Mystring &str, size_t *idx) {
     //simular to stof
-
     char **p = (char **) idx;
     long double i = strtod(str.m_data, p);
     if (idx == nullptr)
@@ -987,24 +977,61 @@ size_t Mystring::capacity() const {
 //实现reserve
 void Mystring::reserve(Mystring s, size_t n) {
 //    Requests that the string capacity be adapted to a planned change in size to a length of up to n characters.
+
 //    If n is 0, this function has no effect.
 //    If n is greater than the current capacity, the function increases the capacity to n.
-//    If n is less than the current capacity, the function does nothing.
+//    If n is less than the current capacity, function try to give the most suitabale capacity for the object.
     if (n > m_capacity) {
-        char *temp = new char[n + 1];
-        setNewCapacity(n, s);
+        // increase the capacity to n
+        char *temp = new char[n + 1]; // make copy of m_data
         strcpy(temp, m_data);
-        delete[] m_data;
-        m_data = temp;
-        m_capacity = n;
+        delete[] m_data; // delete the old data
+        setNewCapacity(n, s); // set the new capacity for s
+        m_data = temp; // assign the old data to m_data
+    }
+    if (n < m_capacity && m_capacity - m_length > 15) {
+        // have space to decrease the capacity
+        char *temp = new char[n + 1]; // make copy of m_data
+        strcpy(temp, m_data);
+        setNewCapacity(n, s); // set the new capacity for s
+        delete[] m_data; // delete the old data
+        m_data = temp; // assign the old data to m_data
     }
 
 }
 
+void Mystring::reserve(size_t n) {
+//    Requests that the string capacity be adapted to a planned change in size to a length of up to n characters.
+
+//    If n is 0, this function has no effect.
+//    If n is greater than the current capacity, the function increases the capacity to n.
+//    If n is less than the current capacity, function try to give the most suitabale capacity for the object.
+    if (n > m_capacity) {
+        // increase the capacity to n
+        char *temp = new char[n + 1]; // make copy of m_data
+        strcpy(temp, m_data);
+        delete[] m_data; // delete the old data
+        setNewCapacity(n, *this); // set the new capacity for s
+        m_data = temp; // assign the old data to m_data
+    }
+    if (n < m_capacity && m_capacity - m_length > 15) {
+        // have space to decrease the capacity
+        char *temp = new char[n + 1]; // make copy of m_data
+        strcpy(temp, m_data);
+        setNewCapacity(n, *this); // set the new capacity for s
+        delete[] m_data; // delete the old data
+        m_data = temp; // assign the old data to m_data
+    }
+
+}
+
+
 //实现clear
 void Mystring::clear() {
-    //清空字符串
-    delete[] this->m_data;
+    //set the string to empty
+    memset(this->m_data, '\0', this->m_length);
+    this->m_length = 0;
+    setNewCapacity(0, *this);
 }
 
 //实现empty
@@ -1299,13 +1326,16 @@ Mystring &Mystring::insert(size_t pos, const Mystring &str, Mystring &first) {
     //insert str to first in position pos
     //make sure pos is not out of range
     if (pos > first.strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return first;
     } else {
         first.setNewLength(first.strlen() +
-                           str.strlen()); //set new length to first with i,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + str.strlen(), first.m_data + pos,
-                strlen(first.m_data) - pos + 1); //move the rest of first to the right
-        memcpy(first.m_data + pos, str.c_str(), str.size());
+                           str.strlen()); //set new length to first with str's length,(capacity is maintained by setNewLength)
+        char *temp = new char[first.length() + 1]; //create a new array to store the new string
+        strcpy(temp, first.m_data + pos); //make copy temp
+        strcpy(first.m_data + pos, str.m_data); //make copy str to first
+        strcat(first.m_data, temp); //make copy temp to first
+        delete[] temp; //release temp
     }
     return first;
 }
@@ -1315,20 +1345,23 @@ Mystring &Mystring::insert(Mystring &first, size_t pos, const Mystring &str, siz
     //insert str to first in position pos, starting at position subpos, for sublen characters
     //make sure pos is not out of range
     if (pos > first.strlen()) {
-        throw "pos is out of range";
+        cout << "pos is out of range" << endl;
+        return first;
     } else {
         if (subpos < 0 || subpos > str.strlen()) { //如果subpos越界
-            throw "subpos is out of range";
+            cout << "subpos is out of range" << endl;
+            return first;
         }
         if (sublen > str.strlen() || sublen == npos) {
             sublen = str.strlen() - subpos;
         }
-        size_t n = sublen; //get the length of str
         first.setNewLength(
-                first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + n, first.m_data + pos,
-                strlen(first.m_data) - pos + 1); //move the rest of first to the right
-        memcpy(first.m_data + pos, str.c_str() + subpos, sublen);
+                first.strlen() + sublen); //set new length to first with sublen,(capacity is maintained by setNewLength)
+        char *temp = new char[first.length() + 1]; //create a new array to store the new string
+        strcpy(temp, first.m_data + pos); //make copy temp
+        strcpy(first.m_data + pos, str.m_data + subpos); //make copy str to first
+        strcat(first.m_data + pos, temp); //make copy temp to first
+        delete[] temp; //release temp
     }
     return first;
 }
@@ -1342,9 +1375,11 @@ Mystring &Mystring::insert(Mystring &first, size_t pos, const char *s) {
         size_t n = strlen(s); //get the length of s
         first.setNewLength(
                 first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + n, first.m_data + pos,
-                strlen(first.m_data) - pos + 1); //move the rest of first to the right
-        memcpy(first.m_data + pos, s, n);
+        char *temp = new char[first.length() + 1]; //create a new array to store the new string
+        strcpy(temp, first.m_data + pos); //make copy temp
+        strcpy(first.m_data + pos, s); //make copy s to first
+        strcat(first.m_data, temp); //make copy temp to first
+        delete[] temp; //release temp
     }
     return first;
 }
@@ -1357,11 +1392,11 @@ Mystring &Mystring::insert(Mystring &first, size_t pos, const char *s, size_t n)
     } else {
         first.setNewLength(
                 first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + n, first.m_data + pos,
-                strlen(first.m_data) - pos + 1); //move the rest of first to the right
-        for (int i = 0; i < n; i++) {
-            first.m_data[pos + i] = s[i];
-        }
+        char *temp = new char[first.length() + 1]; //create a new array to store the new string
+        strcpy(temp, first.m_data + pos); //make copy temp
+        strncpy(first.m_data + pos, s, n); //make copy s to first
+        strcat(first.m_data, temp); //make copy temp to first
+        delete[] temp; //release temp
     }
     return first;
 }
@@ -1374,11 +1409,13 @@ Mystring &Mystring::insert(Mystring &first, size_t pos, size_t n, char c) {
     } else {
         first.setNewLength(
                 first.strlen() + n); //set new length to first with n,(capacity is maintained by setNewLength)
-        memmove(first.m_data + pos + n, first.m_data + pos,
-                strlen(first.m_data) - pos + 1); //move the rest of first to the right
+        char *temp = new char[first.length() + 1]; //create a new array to store the new string
+        strcpy(temp, first.m_data + pos); //make copy temp
         for (int i = 0; i < n; i++) {
-            first.m_data[pos + i] = c; //put n copies of c to first
+            first.m_data[pos + i] = c; //copy c to first
         }
+        strcat(first.m_data, temp); //make copy temp to first
+        delete[] temp; //release tem
     }
     return first;
 }
@@ -1588,10 +1625,10 @@ size_t Mystring::copy(Mystring &src, char *s, size_t len, size_t pos) {
 size_t Mystring::find(const Mystring &str, size_t pos) const {
     //find the first occurrence of str started from position pos
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();    //make sure pos is not out of range
     } else {
         char *temp = strstr(m_data + pos, str.c_str());
-        if (temp == NULL) {
+        if (temp == nullptr) {
             return npos;
         } else {
             return temp - m_data;
@@ -1644,14 +1681,21 @@ size_t Mystring::find(char c, size_t pos) const {
 size_t Mystring::rfind(const Mystring &str, size_t pos) const {
     //find the last occurrence of str started from position pos
     if (pos > strlen()) {
-        pos = strlen();
+        pos = strlen() - 1;
     } else {
-        char *temp = strrstr(m_data + pos, str.c_str());
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
+        for (; pos >= 0; pos--) {
+            if (*(m_data + pos) == *(str.m_data + str.strlen() - 1)) {
+                for (int i = 1; i < str.strlen(); i++) {
+                    if (*(m_data + pos - i) != *(str.m_data + str.m_length - i - 1))
+                        break;
+                    if (i == str.m_length - 1)
+                        return pos - str.m_length + 1;
+                }
+            }
+            if (pos == 0)
+                return npos;
         }
+        return npos;    //if not found
     }
 }
 
@@ -1660,12 +1704,19 @@ size_t Mystring::rfind(const char *s, size_t pos) const {
     if (pos > strlen()) {
         pos = strlen();
     } else {
-        char *temp = strrstr(m_data + pos, s);
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
+        for (; pos >= 0; pos--) {
+            if (*(m_data + pos) == *(s)) {
+                for (int i = 1; i < strlen(s); i++) {
+                    if (*(m_data + pos - i) != *(s + i))
+                        break;
+                    if (i == strlen(s) - 1)
+                        return pos - strlen(s) + 1;
+                }
+            }
+            if (pos == 0)
+                return npos;
         }
+        return npos;    //if not found
     }
 }
 
@@ -1674,12 +1725,19 @@ size_t Mystring::rfind(const char *s, size_t pos, size_t n) const {
     if (pos > strlen()) {
         pos = strlen();
     } else {
-        char *temp = strrstr(m_data + pos, s);
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
+        for (; pos >= 0; pos--) {
+            if (*(m_data + pos) == *(s)) {
+                for (int i = 1; i < n; i++) {
+                    if (*(m_data + pos - i) != *(s + i))
+                        break;
+                    if (i == n - 1)
+                        return pos - n + 1;
+                }
+            }
+            if (pos == 0)
+                return npos;
         }
+        return npos;    //if not found
     }
 }
 
@@ -1688,12 +1746,14 @@ size_t Mystring::rfind(char c, size_t pos) const {
     if (pos > strlen()) {
         pos = strlen();
     } else {
-        char *temp = strrchr(m_data + pos, c);
-        if (temp == NULL) {
-            return npos;
-        } else {
-            return temp - m_data;
+        for (; pos >= 0; pos--) {
+            if (*(m_data + pos) == c) {
+                return pos;
+            }
+            if (pos == 0)
+                return npos;
         }
+        return npos;    //if not found
     }
 }
 
@@ -1767,30 +1827,36 @@ size_t Mystring::find_first_of(char c, size_t pos) const {
 
 size_t Mystring::find_last_of(const Mystring &str, size_t pos) const {
     //find the last occurrence of any character in str from position pos (search from the end)
-    if (pos > strlen() || pos == 0) {
-        pos = strlen();
-    } else {
-        char *temp = strrpbrk(m_data + pos, str.c_str());
-        if (temp == nullptr) {
-            return npos;
-        } else {
-            return temp - m_data;
+    if (pos >= m_length) {
+        pos = m_length - 1;                //track the position of the last character
+        while (pos >= 0) {
+            for (size_t temp = 0; temp < str.m_length; temp++)
+                if (*(m_data + pos) == *(str.m_data + temp))        //search
+                {
+                    return pos;
+                }
+            if (pos == 0)
+                break;
+            pos--;
         }
+        return npos;
     }
 }
 
 size_t Mystring::find_last_of(const char *s, size_t pos) const {
     //find the last occurrence of s from position pos (search from the end)
-    if (pos > strlen()) {
-        pos = strlen();
-    } else {
-        char *temp = strrpbrk(m_data + pos, s);
-        if (temp == nullptr) {
-            return npos;
-        } else {
-            return temp - m_data;
-        }
+    if (pos >= m_length)
+        pos = m_length - 1;
+    while (pos >= 0) {
+        for (size_t temp = 0; *(s + temp) != '\0'; temp++)
+            if (*(m_data + pos) == *(s + temp)) {
+                return pos;
+            }
+        if (pos == 0)
+            break;
+        pos--;
     }
+    return npos;
 }
 
 size_t Mystring::find_last_of(const char *s, size_t pos, size_t n) const {
@@ -1947,12 +2013,18 @@ size_t Mystring::find_last_not_of(char c, size_t pos) const {
 
 Mystring Mystring::substr(size_t pos, size_t len) const {
     //Returns a substring of m_data of length len starting at position pos.
-    char *temp = new char[len + 1]; //create a new array of size len + 1 ( 1 for '\0')
+    if (len = npos) {
+        len = strlen(m_data);
+    }
 
     if (pos > strlen()) {
-        throw "pos is out of range";    //make sure pos is not out of range
+        pos = strlen();
     } else {
-        strncpy(temp, m_data + pos, len); //copy the substring to temp
+        char *temp = new char[len + 1]; //create a new array of size len + 1 ( 1 for '\0')
+
+        for (int i = 0; i < len; ++i) {
+            temp[i] = m_data[pos + i];
+        }
         temp[len] = '\0'; //add '\0' to the end of temp
         return Mystring(temp); //return a Mystring object with temp as its m_data
     }
@@ -2161,7 +2233,7 @@ Mystring &operator+(char lhs, const Mystring &rhs) {
 Mystring &operator+(const char *lhs, const Mystring &rhs) {
     //concatenate a const char and a string
     Mystring tool;
-    Mystring *temp = new Mystring();
+    Mystring *temp;
     temp->setNewLength(tool.strlen(lhs) + rhs.strlen());
     tool.memcpy(temp->m_data, lhs, tool.strlen(lhs));
     tool.memcpy(temp->m_data + tool.strlen(lhs), rhs.c_str(), rhs.strlen());
@@ -2173,20 +2245,43 @@ bool operator==(const Mystring &left, const Mystring &right) {
     if (left.strlen() != right.strlen()) {
         return false;
     } else {
-        return left.compare(right.c_str());
+        for (int i = 0; i < left.strlen() || i < right.strlen(); ++i) {
+            if (left.m_data[i] != right.m_data[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
 bool operator==(const char *left, const Mystring &right) {
     //compare a const char and a string
     Mystring tool;
-    return tool.compare(left, right.c_str());
+    if (right.strlen() != tool.strlen(left)) {
+        return false;
+    } else {
+        for (int i = 0; i < tool.strlen(left) || i < right.strlen(); ++i) {
+            if (left[i] != right.m_data[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 bool operator==(const Mystring &left, const char *right) {
     //compare a string and a const char
     Mystring tool;
-    return tool.compare(left.c_str(), right);
+    if (left.strlen() != tool.strlen(right)) {
+        return false;
+    } else {
+        for (int i = 0; i < left.strlen() || i < tool.strlen(right); ++i) {
+            if (left.m_data[i] != right[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 bool operator!=(const Mystring &left, const Mystring &right) {
@@ -2194,20 +2289,43 @@ bool operator!=(const Mystring &left, const Mystring &right) {
     if (left.strlen() != right.strlen()) {
         return true;
     } else {
-        return left.compare(right.c_str());
+        for (int i = 0; i < left.strlen() || i < right.strlen(); ++i) {
+            if (left.m_data[i] != right.m_data[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
 bool operator!=(const char *left, const Mystring &right) {
     //compare a const char and a string
     Mystring tool;
-    return tool.compare(left, right.c_str());
+    if (right.strlen() != tool.strlen(left)) {
+        return true;
+    } else {
+        for (int i = 0; i < tool.strlen(left) || i < right.strlen(); ++i) {
+            if (left[i] != right.m_data[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 bool operator!=(const Mystring &left, const char *right) {
     //compare a string and a const char
     Mystring tool;
-    return tool.compare(left.c_str(), right);
+    if (left.strlen() != tool.strlen(right)) {
+        return true;
+    } else {
+        for (int i = 0; i < left.strlen() || i < tool.strlen(right); ++i) {
+            if (left.m_data[i] != right[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 bool operator<(const Mystring &left, const Mystring &right) {
@@ -2215,20 +2333,40 @@ bool operator<(const Mystring &left, const Mystring &right) {
     if (left.strlen() < right.strlen()) {
         return true;
     } else {
-        return left.compare(right) < 0;
+        for (int i = 0; i < left.strlen() || i < right.strlen(); ++i) {
+            if (left.m_data[i] < right.m_data[i]) {
+                return true;
+            }
+        }
     }
 }
 
 bool operator<(const char *left, const Mystring &right) {
     //if const char left is less than string right, return true
     Mystring tool;
-    return tool.compare(left, right.c_str()) < 0;
+    if (right.strlen() < tool.strlen(left)) {
+        return true;
+    } else {
+        for (int i = 0; i < tool.strlen(left) || i < right.strlen(); ++i) {
+            if (left[i] < right.m_data[i]) {
+                return true;
+            }
+        }
+    }
 }
 
 bool operator<(const Mystring &left, const char *right) {
     //if string left is less than const char right, return true
     Mystring tool;
-    return tool.compare(left.c_str(), right) < 0; //TODO check compare function
+    if (left.strlen() < tool.strlen(right)) {
+        return true;
+    } else {
+        for (int i = 0; i < left.strlen() || i < tool.strlen(right); ++i) {
+            if (left.m_data[i] < right[i]) {
+                return true;
+            }
+        }
+    }
 }
 
 bool operator<=(const Mystring &left, const Mystring &right) {
@@ -2236,7 +2374,11 @@ bool operator<=(const Mystring &left, const Mystring &right) {
     if (left.strlen() <= right.strlen()) {
         return true;
     } else {
-        return left.compare(right) <= 0;
+        for (int i = 0; i < left.strlen() || i < right.strlen(); ++i) {
+            if (left.m_data[i] <= right.m_data[i]) {
+                return true;
+            }
+        }
     }
 }
 
@@ -2369,6 +2511,7 @@ void Mystring::setNewLength(size_t newLength, Mystring s) {
     }
     s.m_length = newLength;
 }
+
 
 char *Mystring::strrstr(char *string, const char *str) const {
     //find the last occurrence of str in string

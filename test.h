@@ -9,6 +9,8 @@
 
 class test {
 public:
+    void printLine();
+
     void test_inputoutput();
 
     void test_memcpy();
@@ -24,10 +26,6 @@ public:
     void test_strncat();
 
     void test_memcmp();
-
-    void test_strcmp();
-
-    void test_strcoll();
 
     void test_strncmp();
 
@@ -54,7 +52,17 @@ public:
 
     void test_stol();
 
-    void test_strtol();
+    void test_stoul();
+
+    void test_stoll();
+
+    void test_stoull();
+
+    void test_stof();
+
+    void test_stod();
+
+    void test_stold();
 
 //part3 test
     void test_constructor();
@@ -64,13 +72,7 @@ public:
 
     void test_size();
 
-    void test_length();
-
-    void test_max_size();
-
     void test_resize();
-
-    void test_capacity();
 
     void test_reserve();
 
@@ -121,8 +123,6 @@ public:
     void test_compare();
 
     void test_swap();
-
-    void test_getline();
 };
 
 
