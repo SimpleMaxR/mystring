@@ -390,10 +390,10 @@ private:
     size_t m_capacity;//    字符串容量
 
     inline void setNewCapacity(size_t newCapacity);
+
+    void
     void setNewCapacity(size_t newCapacity, Mystring s);
-
     void setNewLength(size_t newLength);
-
     void setNewLength(size_t newLength, Mystring s);
 
 
